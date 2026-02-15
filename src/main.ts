@@ -1,71 +1,76 @@
 import './scss/styles.scss';
-import { apiProducts } from './utils/data';
-import { ProductCatalog } from './components/models/ProductCatalog';
-import { ShoppingCart } from './components/models/ShoppingCart';
-import { Buyer } from './components/models/Buyer';
 import { Api } from './components/base/Api';
-import { API_URL } from './utils/constants';
-import { ServerApi } from './components/communication/ServerAPI';
-import { IOrderResultApi } from './types';
+import { Communication } from './components/Models/Communication';
+import { Catalog } from "./components/Models/Catalog";
+import { Cart } from "./components/Models/Cart";
+import { Buyer } from "./components/Models/Buyer";
+import { apiProducts } from "./utils/data";
+import { API_URL } from "./utils/constants";
 
-// Проверка работы моделей данных
-const productsModel = new ProductCatalog();
-productsModel.saveProducts(apiProducts.items); // Cохранение массива товаров, полученного в параметрах метода, в модель каталога
-console.log('Массив товаров из каталога: ', productsModel.getProducts()); // Получение массива товаров из модели
-console.log('Найденный по id товар: ', productsModel.getProductByID("854cef69-976d-4c2a-a18c-2aa45046c390")); // Получение одного товара по его id
-console.log('Ненайденный по id товар: ', productsModel.getProductByID("854cef69-976d-4c2a-a18c-2aa45046c391")); // Получение одного товара по его id
-productsModel.saveProduct(apiProducts.items[0]); // Cохранение товара для подробного отображения
-console.log('Получение для подробного отображения товара : ', productsModel.getProduct()); // Получение товара для подробного отображения
+// Получаем адрес из переменной окружения
+const apiOrigin = API_URL;
 
-const shoppingCartModel = new ShoppingCart();
-shoppingCartModel.addSelectedProduct(apiProducts.items[0]); // Добавление товара, который был получен в параметре, в массив корзины
-shoppingCartModel.addSelectedProduct(apiProducts.items[1]);
-shoppingCartModel.addSelectedProduct(apiProducts.items[2]);
-console.log('Массив товаров, которые находятся в корзине: ', shoppingCartModel.getSelectedProducts()); // Получение массива товаров, которые находятся в корзине
-console.log('Проверка наличия товара в корзине: ', shoppingCartModel.checkSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390")); // Проверка наличия товара в корзине по его id, полученного в параметр метода
-shoppingCartModel.deleteSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390"); // Удаление товара, полученного в параметре из массива корзины
-console.log('Проверка наличия товара в корзине после удаления товара: ', shoppingCartModel.checkSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390"));
-console.log('Массив товаров, которые находятся в корзине после удаления товара: ', shoppingCartModel.getSelectedProducts());
-console.log('Количество товаров в корзине: ', shoppingCartModel.getSelectedProductsAmount()); // Получение количества товаров в корзине
-console.log('Стоимость всех товаров в корзине: ', shoppingCartModel.getTotal()); // Получение стоимости всех товаров в корзине
-shoppingCartModel.clearShoppingCart(); // Очистка корзины
-console.log('Массив товаров, которые находятся в корзине, после очистки корзины: ', shoppingCartModel.getSelectedProducts());
+// Создаём экземпляр Api с базовым URL
+const api = new Api(apiOrigin);
 
-const buyerModel = new Buyer();
-buyerModel.savePaymentType('card'); // Сохранение типа оплаты в модели
-buyerModel.saveAddress('Moscow, Leninskaya st'); // Сохранение адреса в модели
-buyerModel.saveEmail('buyer@gmail.com'); // Сохранение email в модели
-buyerModel.savePhone('89038752853'); // Сохранение телефона в модели
-console.log('Данные покупателя: ', buyerModel.getData()); // Получение всех данных покупателя
-buyerModel.clearBuyerData(); // Очистка данных покупателя
-console.log('Данные покупателя после очистки данных: ', buyerModel.getData());
-console.log('Валидация данных покупателя: ', buyerModel.validate()); // Валидация данных
+// Создаём экземпляр Communication, передавая Api
+const communication = new Communication(api);
+const catalog = new Catalog();
 
-// Запрос на сервер для получения каталога товаров
-const apiModel = new Api(API_URL);
-const serverApiModel = new ServerApi(apiModel);
-serverApiModel.getProducts()
-  .then((result: IOrderResultApi) => {
-    console.log('Товары получены с сервера');
-    productsModel.saveProducts(result.items);
-    console.log('Массив товаров с сервера: ', productsModel.getProducts()); // Проерка работы класса ProductCatalog
-    console.log('Найденный по id товар: ', productsModel.getProductByID("854cef69-976d-4c2a-a18c-2aa45046c390"));
-    console.log('Ненайденный по id товар: ', productsModel.getProductByID("854cef69-976d-4c2a-a18c-2aa45046c391"));
-    productsModel.saveProduct(result.items[0]);
-    console.log('Получение для подробного отображения товара : ', productsModel.getProduct());
-
-    shoppingCartModel.addSelectedProduct(result.items[0]); // Проерка работы класса ShoppingCart
-    shoppingCartModel.addSelectedProduct(result.items[1]);
-    console.log('Массив товаров, которые находятся в корзине: ', shoppingCartModel.getSelectedProducts());
-    console.log('Проверка наличия товара в корзине: ', shoppingCartModel.checkSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390"));
-    shoppingCartModel.deleteSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390");
-    console.log('Проверка наличия товара в корзине после удаления товара: ', shoppingCartModel.checkSelectedProduct("854cef69-976d-4c2a-a18c-2aa45046c390"));
-    console.log('Массив товаров, которые находятся в корзине после удаления товара: ', shoppingCartModel.getSelectedProducts());
-    console.log('Количество товаров в корзине: ', shoppingCartModel.getSelectedProductsAmount());
-    console.log('Стоимость всех товаров в корзине: ', shoppingCartModel.getTotal());
-    shoppingCartModel.clearShoppingCart();
-    console.log('Массив товаров, которые находятся в корзине, после очистки корзины: ', shoppingCartModel.getSelectedProducts());
+// Пример получения каталога
+communication.getProductList()
+  .then(productlist => {
+    catalog.setProducts(productlist);
+    console.log('Каталог после получения с сервера:', catalog.getProducts());
   })
-  .catch(error => {
-    console.error('Ошибка', error);
-  });
+  .catch(err => console.error(err));
+
+// === Тестируем Catalog ===
+catalog.setProducts(apiProducts.items);
+
+console.log("=== Тест Catalog ===");
+console.log("Все товары:", catalog.getProducts());
+console.log("Товар по id '1':", catalog.getProductById("1"));
+
+// Устанавливаем выбранный товар
+const selected = catalog.getProductById("1");
+if (selected) catalog.setSelectedProduct(selected);
+console.log("Выбранный товар:", catalog.getSelectedProduct());
+
+// === Тестируем Cart ===
+const cart = new Cart();
+console.log("\n=== Тест Cart ===");
+console.log("Начальная корзина:", cart.getItems());
+
+if (selected) cart.addItem(selected);
+console.log("После добавления товара:", cart.getItems());
+
+console.log("Есть товар с id '1'?", cart.hasItem("1"));
+
+console.log("Общая стоимость:", cart.getTotalPrice());
+console.log("Количество товаров:", cart.getCount());
+
+cart.removeItem(selected!);
+console.log("После удаления товара:", cart.getItems());
+
+cart.clear();
+console.log("После очистки корзины:", cart.getItems());
+
+// === Тестируем Buyer ===
+const buyer = new Buyer({
+  payment: "card",
+  email: "user@example.com",
+  phone: "1234567890",
+  address: "ул. Пушкина, 1",
+});
+
+console.log("\n=== Тест Buyer ===");
+console.log("Данные покупателя:", buyer.getData());
+
+buyer.setData({ payment: "cash", email: "test@example.com", phone: "0987654321", address: "ул. Лермонтова, 10" });
+console.log("После обновления данных:", buyer.getData());
+
+console.log("Валидация данных:", buyer.validate());
+
+buyer.clear();
+console.log("После очистки данных:", buyer.getData());
