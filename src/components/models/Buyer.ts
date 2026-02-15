@@ -1,74 +1,80 @@
-import { IBuyer, TPayment } from "../../types/index";
+// src/components/Models/Buyer.ts
+import { IBuyer } from "../../types";
 
+/**
+ * Класс Buyer — управляет данными покупателя.
+ * Отвечает за хранение и изменение данных, их валидацию.
+ */
 export class Buyer {
-  protected data: IBuyer;
+  private payment: IBuyer["payment"]; // способ оплаты
+  private email: string;              // email покупателя
+  private phone: string;              // телефон покупателя
+  private address: string;            // адрес доставки
 
-  constructor() {
-    this.data = {
-      payment: "",
-      address: "",
-      email: "",
-      phone: "",
-    };
+  /**
+   * Конструктор класса
+   * @param data - объект с начальными данными покупателя (необязательно)
+   */
+  constructor(data?: IBuyer) {
+    this.payment = data?.payment || "card"; // по умолчанию "карта"
+    this.email = data?.email || "";
+    this.phone = data?.phone || "";
+    this.address = data?.address || "";
   }
 
-  savePaymentType(payment: TPayment) {
-    this.data.payment = payment;
+  /**
+   * Устанавливает данные покупателя. Можно передавать только поля, которые нужно изменить.
+   * @param data - объект Partial<IBuyer> с полями для изменения
+   */
+  setData(data: Partial<IBuyer>): void {
+    this.payment = data.payment ?? this.payment;
+    this.email = data.email ?? this.email;
+    this.phone = data.phone ?? this.phone;
+    this.address = data.address ?? this.address;
   }
 
-  saveAddress(address: string) {
-    this.data.address = address;
-  }
-
-  saveEmail(email: string) {
-    this.data.email = email;
-  }
-
-  savePhone(phone: string) {
-    this.data.phone = phone;
-  }
-
+  /**
+   * Возвращает все данные покупателя
+   * @returns объект IBuyer с текущими значениями полей
+   */
   getData(): IBuyer {
-    return this.data;
-  }
-
-  clearBuyerData() {
-    this.data = {
-      payment: "",
-      address: "",
-      email: "",
-      phone: "",
+    return {
+      payment: this.payment,
+      email: this.email,
+      phone: this.phone,
+      address: this.address,
     };
   }
 
-  validate(): {
-    payment: string;
-    address: string;
-    email: string;
-    phone: string;
-  } {
-    const errors = {
-      payment: "",
-      address: "",
-      email: "",
-      phone: "",
+  /**
+   * Очищает данные покупателя, сбрасывая их к значениям по умолчанию
+   */
+  clear(): void {
+    this.payment = "card";
+    this.email = "";
+    this.phone = "";
+    this.address = "";
+  }
+
+  /**
+   * Проверяет валидность каждого поля покупателя
+   * @returns объект с флагами валидности каждого поля
+   */
+  validate(): { payment: boolean; email: boolean; phone: boolean; address: boolean } {
+    return {
+      payment: this.payment !== undefined,
+      email: this.email.includes("@"),
+      phone: this.phone.length >= 10,
+      address: this.address.length > 5,
     };
+  }
 
-    if (!this.data.payment.trim()) {
-      errors.payment = "Не выбран вид оплаты";
-    }
-    if (!this.data.address.trim()) {
-      errors.address = "Укажите адрес";
-    }
-
-    if (!this.data.email.trim()) {
-      errors.email = "Укажите email";
-    }
-
-    if (!this.data.phone.trim()) {
-      errors.phone = "Укажите телефон";
-    }
-
-    return errors;
+  /**
+   * Проверяет общую валидность данных покупателя
+   * @returns true, если все поля валидны
+   */
+  isValid(): boolean {
+    const v = this.validate();
+    return v.payment && v.email && v.phone && v.address;
   }
 }
