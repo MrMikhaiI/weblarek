@@ -27,6 +27,7 @@ export function ensureAllElements<T extends HTMLElement>(selectorElement: Select
 
 export type SelectorElement<T> = T | string;
 
+
 export function ensureElement<T extends HTMLElement>(selectorElement: SelectorElement<T>, context?: HTMLElement): T {
     if (isSelector(selectorElement)) {
         const elements = ensureAllElements<T>(selectorElement, context);
@@ -46,10 +47,8 @@ export function ensureElement<T extends HTMLElement>(selectorElement: SelectorEl
 
 export function cloneTemplate<T extends HTMLElement>(query: string | HTMLTemplateElement): T {
     const template = ensureElement(query) as HTMLTemplateElement;
-    if (!template.content.firstElementChild) {
-        throw new Error(`Template ${query} has no content`);
-    }
-    return template.content.firstElementChild.cloneNode(true) as T;
+    return template.content.firstElementChild!.cloneNode(true) as T; // не забыть убрать подавление "!"
+    
 }
 
 export function bem(block: string, element?: string, modifier?: string): { name: string, class: string } {
@@ -69,7 +68,7 @@ export function getObjectProperties(obj: object, filter?: (name: string, prop: P
         )
     )
         .filter(([name, prop]: [string, PropertyDescriptor]) => filter ? filter(name, prop) : (name !== 'constructor'))
-        .map(([name,]) => name);
+        .map(([name, _ ]) => name); // заменить на  .map(([name, prop]) => name);
 }
 
 /**
