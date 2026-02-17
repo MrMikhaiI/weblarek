@@ -1,76 +1,80 @@
-import './scss/styles.scss';
-import { Api } from './components/base/Api';
-import { Communication } from './components/Models/Communication';
-import { Catalog } from "./components/Models/Catalog";
-import { Cart } from "./components/Models/Cart";
-import { Buyer } from "./components/Models/Buyer";
-import { apiProducts } from "./utils/data";
-import { API_URL } from "./utils/constants";
+import './scss/styles.scss'; 
+import { Api } from './components/base/Api'; 
+import { Communication } from './components/models/Communication';  
+import { Catalog } from "./components/models/Catalog";            
+import { Cart } from "./components/models/Cart";                   
+import { Buyer } from "./components/models/Buyer";               
+import { apiProducts } from "./utils/data"; 
+import { API_URL } from "./utils/constants"; 
 
-// Получаем адрес из переменной окружения
-const apiOrigin = API_URL;
+// Создаём экземпляры классов
+const api = new Api(API_URL); 
+const communication = new Communication(api); 
+const catalog = new Catalog(); 
+const cart = new Cart(); 
+const buyer = new Buyer(); 
 
-// Создаём экземпляр Api с базовым URL
-const api = new Api(apiOrigin);
-
-// Создаём экземпляр Communication, передавая Api
-const communication = new Communication(api);
-const catalog = new Catalog();
-
-// Пример получения каталога
-communication.getProductList()
-  .then(productlist => {
-    catalog.setProducts(productlist);
-    console.log('Каталог после получения с сервера:', catalog.getProducts());
+// === 1. Получаем товары с сервера ===
+communication.getProductList() 
+  .then(products => { 
+    catalog.setProducts(products); 
+    console.log('Каталог с сервера:', catalog.getProducts()); 
   })
-  .catch(err => console.error(err));
+  .catch(err => console.error('Ошибка сервера:', err));
 
-// === Тестируем Catalog ===
-catalog.setProducts(apiProducts.items);
+// === 2. Тестируем Catalog ===
+catalog.setProducts(apiProducts.items.map(item => ({ 
+  ...item, 
+  price: item.price || 0  
+})));
+console.log("\n=== Тест Catalog ===");
+console.log("Все товары:", catalog.getProducts()); 
 
-console.log("=== Тест Catalog ===");
-console.log("Все товары:", catalog.getProducts());
-console.log("Товар по id '1':", catalog.getProductById("1"));
+const realProduct = catalog.getProductById(apiProducts.items[0].id); 
+console.log(`Товар по id '${realProduct?.id}':`, realProduct); 
 
-// Устанавливаем выбранный товар
-const selected = catalog.getProductById("1");
-if (selected) catalog.setSelectedProduct(selected);
-console.log("Выбранный товар:", catalog.getSelectedProduct());
+if (realProduct) {
+  catalog.setSelectedProduct(realProduct); 
+  console.log("Выбранный товар:", catalog.getSelectedProduct()); 
+}
 
-// === Тестируем Cart ===
-const cart = new Cart();
+// === 3. Тестируем Cart ===
 console.log("\n=== Тест Cart ===");
-console.log("Начальная корзина:", cart.getItems());
+console.log("Начальная корзина:", cart.getItems()); 
 
-if (selected) cart.addItem(selected);
-console.log("После добавления товара:", cart.getItems());
+if (realProduct) {
+  cart.addItem(realProduct); 
+  console.log("После добавления:", cart.getItems()); 
+  console.log("Есть товар?", cart.hasItem(realProduct.id)); 
+  console.log("Стоимость:", cart.getTotalPrice()); 
+  console.log("Количество:", cart.getCount()); 
+}
 
-console.log("Есть товар с id '1'?", cart.hasItem("1"));
+if (realProduct) {
+  cart.removeItem(realProduct); 
+}
+console.log("После удаления:", cart.getItems()); 
+cart.clear(); 
+console.log("После очистки:", cart.getItems()); 
 
-console.log("Общая стоимость:", cart.getTotalPrice());
-console.log("Количество товаров:", cart.getCount());
+// === 4. Тестируем Buyer ===
+console.log("\n=== Тест Buyer (реальный сценарий) ===");
 
-cart.removeItem(selected!);
-console.log("После удаления товара:", cart.getItems());
+console.log("1. Изначально (пусто):", buyer.getData()); 
+console.log("1. Валидация (все ошибки):", buyer.validate()); 
 
-cart.clear();
-console.log("После очистки корзины:", cart.getItems());
+buyer.setData({ payment: "card" }); 
+console.log("2. Только payment:", buyer.getData()); 
+console.log("2. Валидация:", buyer.validate()); 
 
-// === Тестируем Buyer ===
-const buyer = new Buyer({
-  payment: "card",
-  email: "user@example.com",
-  phone: "1234567890",
-  address: "ул. Пушкина, 1",
-});
+buyer.setData({ email: "user@example.com" }); 
+console.log("3. +email:", buyer.getData()); 
+console.log("3. Валидация:", buyer.validate()); 
 
-console.log("\n=== Тест Buyer ===");
-console.log("Данные покупателя:", buyer.getData());
+buyer.setData({ phone: "1234567890", address: "ул. Пушкина, 1" }); 
+console.log("4. Полные данные:", buyer.getData()); 
+console.log("4. Валидация:", buyer.validate()); 
 
-buyer.setData({ payment: "cash", email: "test@example.com", phone: "0987654321", address: "ул. Лермонтова, 10" });
-console.log("После обновления данных:", buyer.getData());
-
-console.log("Валидация данных:", buyer.validate());
-
-buyer.clear();
-console.log("После очистки данных:", buyer.getData());
+buyer.clear(); 
+console.log("5. После очистки:", buyer.getData()); 
+console.log("5. Валидация (все ошибки):", buyer.validate());
