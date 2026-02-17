@@ -1,37 +1,44 @@
-import { Api } from '../base/Api';
-import { IProduct, IOrder } from '../../types/index';
-import { API_URL } from '../../utils/constants'; // <-- путь из constants.ts
+import { Api } from '../base/Api'; 
+import { IApi, IProduct, IOrder, IBuyer } from '../../types';
+import { API_URL } from '../../utils/constants'; 
 
-interface IApiProductsResponse {
+interface IApiProductsResponse { 
+  items: IProduct[]; 
+} 
+
+interface IOrderRequest {
   items: IProduct[];
+  buyer: IBuyer;  
 }
 
-export class Communication {
-  private api: Api;
+interface IOrderResponse {
+  success?: boolean;
+}
 
-  constructor(api: Api) {
-    this.api = api;
-  }
+export class Communication { 
+  private api: IApi;  
 
-  /** Получение массива товаров с сервера */
-  async getProductList(): Promise<IProduct[]> {
-    try {
-      // собираем полный URL для запроса
-      const response = await this.api.get<IApiProductsResponse>(`/product/`);
-      return response.items || [];
-    } catch (error) {
-      console.error('Ошибка при получении товаров:', error);
-      return [];
-    }
-  }
+  /** 
+   * Конструктор использует композицию: принимает IApi для запросов
+   * @param api 
+   */ 
+  constructor(api: IApi) { 
+    this.api = api; 
+  } 
 
-  /** Отправка данных заказа на сервер */
-  async sendOrder(order: IOrder): Promise<object> {
-    try {
-      return await this.api.post(`${API_URL}/order/`, order);
-    } catch (error) {
-      console.error('Ошибка при отправке заказа:', error);
-      return {};
-    }
-  }
+  /** Получение массива товаров с сервера 
+   * @returns Promise<IProduct[]> 
+   */ 
+  async getProductList(): Promise<IProduct[]> { 
+    const response = await this.api.get<IApiProductsResponse>(`${API_URL}/product/`); 
+    return response.items || []; 
+  } 
+
+  /** Отправка данных заказа на сервер 
+   * @param order - объект заказа {items: IProduct[], buyer: IBuyer}
+   * @returns Promise<IOrderResponse> 
+   */ 
+  async sendOrder(order: IOrder): Promise<IOrderResponse> {  
+    return await this.api.post(`${API_URL}/order/`, order); 
+  } 
 }
