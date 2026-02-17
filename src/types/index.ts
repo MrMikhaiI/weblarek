@@ -13,7 +13,7 @@ export interface IProduct {
   description: string; // описание товара 
   image: string;    // ссылка на изображение товара 
   category: string; // категория, к которой относится товар 
-  price: number;    // цена товара (всегда указана, null нет по ТЗ)
+  price: number;    // цена товара 
 } 
 
 export interface IBuyer { 
