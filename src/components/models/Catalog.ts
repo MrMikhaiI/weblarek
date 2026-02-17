@@ -1,15 +1,14 @@
-// src/components/Models/Catalog.ts
 import { IProduct } from "../../types";
 
 /**
  * Класс Catalog — управляет списком товаров и выбранным товаром
  */
 export class Catalog {
-  private products: IProduct[]; // список товаров
-  private selectedProduct: IProduct | null; // текущий выбранный товар
+  private products: IProduct[] = [];    
+  private selectedProduct: IProduct | null;
 
-  constructor(products: IProduct[] = []) {
-    this.products = products;
+  constructor() {                          
+    this.products = [];                   
     this.selectedProduct = null;
   }
 
