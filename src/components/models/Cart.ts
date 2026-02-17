@@ -1,21 +1,11 @@
-// src/models/Cart.ts
-import { IProduct } from '../../types/index.ts';
+import { IProduct } from '../../types'; 
 
 /**
  * Класс Cart
- * 
  * Отвечает за хранение и управление корзиной товаров.
  */
 export class Cart {
-  private items: IProduct[]; // товары, добавленные в корзину
-
-  /**
-   * Конструктор класса Cart
-   * @param items - массив товаров (по умолчанию пустой)
-   */
-  constructor(items: IProduct[] = []) {
-    this.items = items;
-  }
+  private items: IProduct[] = [];  
 
   /**
    * Получить массив товаров в корзине
@@ -53,7 +43,7 @@ export class Cart {
    * @returns сумма цен товаров
    */
   getTotalPrice(): number {
-    return this.items.reduce((sum, item) => sum + (item.price ?? 0), 0);
+    return this.items.reduce((sum, item) => sum + item.price, 0);  
   }
 
   /**
