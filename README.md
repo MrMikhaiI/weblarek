@@ -14,6 +14,8 @@
 - `src/utils/constants.ts` — файл с константами
 - `src/utils/utils.ts` — файл с утилитами
 
+---
+
 ## Установка и запуск
 
 Для установки и запуска проекта выполните команды:
@@ -104,105 +106,80 @@ yarn build
 `emit<T extends object>(event: string, data?: T): void` — генерация события.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` — создание обработчика события.
 
-### Данные
+### Данные 
 
-Используются две сущности: **товар** и **покупатель**.
+Используются две сущности: **товар** и **покупатель**. 
 
-#### Интерфейс `IProduct`
+#### Интерфейс `IProduct` 
+Определяет структуру товара. 
+**Поля интерфейса:**   
+- `id: string` — уникальный идентификатор товара   
+- `title: string` — название товара  
+- `description: string` — подробное описание товара   
+- `image: string` — путь к изображению товара   
+- `category: string` — категория товара   
+- `price: number` — цена товара (всегда указана) 
 
-Определяет структуру товара.
+#### Интерфейс `IBuyer` 
+Определяет структуру данных покупателя для оформления заказа. 
+**Поля интерфейса:**   
+- `payment: TPayment` — способ оплаты (`'card' | 'cash'`)  
+- `address: string` — адрес доставки   
+- `email: string` — email покупателя   
+- `phone: string` — телефон покупателя 
 
-**Поля интерфейса:**  
-- `id: string` — уникальный идентификатор товара  
-- `title: string` — название товара (в карточках и корзине)  
-- `description: string` — подробное описание товара  
-- `image: string` — путь к изображению товара  
-- `category: string` — категория товара  
-- `price: number | null` — цена товара (может отсутствовать)
+**Тип `TPayment`:** `type TPayment = 'card' | 'cash'`
 
-#### Интерфейс `IBuyer`
+### Модели данных 
 
-Определяет структуру данных покупателя для оформления заказа.
+#### Класс `Catalog` 
+Хранит каталог товаров и выбранный товар. 
+**Конструктор:** `constructor()` — инициализирует пустые списки товаров. 
+**Поля класса:**   
+- `private products: IProduct[]` — массив всех товаров.   
+- `private selectedProduct: IProduct | null` — выбранный товар. 
+**Методы:**   
+- `setProducts(products: IProduct[]): void` — сохраняет массив товаров.   
+- `getProducts(): IProduct[]` — возвращает все товары.   
+- `getProductById(id: string): IProduct | undefined` — товар по ID.   
+- `setSelectedProduct(product: IProduct): void` — сохраняет выбранный товар.   
+- `getSelectedProduct(): IProduct | null` — возвращает выбранный товар. 
 
-**Поля интерфейса:**  
-- `payment: TPayment` — способ оплаты  
-- `address: string` — адрес доставки  
-- `email: string` — email покупателя  
-- `phone: string` — телефон покупателя
+#### Класс `Cart` 
+Управляет корзиной покупок. 
+**Конструктор:** `constructor()` — инициализирует пустую корзину. 
+**Поля класса:**   
+- `private items: IProduct[]` — товары в корзине. 
+**Методы:**   
+- `getItems(): IProduct[]` — товары корзины.   
+- `addItem(product: IProduct): void` — добавляет товар.   
+- `removeItem(product: IProduct): void` — удаляет товар.   
+- `clear(): void` — очищает корзину.   
+- `getTotalPrice(): number` — общая стоимость.   
+- `getCount(): number` — количество товаров.   
+- `hasItem(id: string): boolean` — проверка наличия товара. 
 
-**Тип `TPayment`:**  
-`type TPayment = 'card' | 'cash' | ''` — ограниченный набор способов оплаты.
+#### Класс `Buyer` 
+Хранит и валидирует данные покупателя. 
+**Конструктор:** `constructor(data?: Partial<IBuyer>)` — пустые или начальные данные. 
+**Поля класса:**   
+- `private payment: TPayment | ""` — способ оплаты  
+- `private email: string` — email покупателя
+- `private phone: string` — телефон покупателя
+- `private address: string` — адрес доставки
+**Методы:**   
+- `setData(data: Partial<IBuyer>): void` — обновляет данные (по частям).   
+- `getData(): IBuyer` — возвращает все данные.   
+- `clear(): void` — очищает данные.   
+- `validate(): Partial<Record<keyof IBuyer, string>>` — возвращает ошибки валидации. 
 
-### Модели данных
+### Слой коммуникации 
 
-#### Класс `ProductCatalog`
-
-Хранит каталог товаров и выбранный товар.
-
-**Конструктор:**  
-`constructor()` — инициализирует пустые списки товаров.
-
-**Поля класса:**  
-`protected products: IProduct[]` — массив всех товаров.  
-`protected selectedProduct: IProduct | null` — выбранный товар.
-
-**Методы:**  
-`saveProducts(products: IProduct[]): void` — сохраняет массив товаров.  
-`getProducts(): IProduct[]` — возвращает все товары.  
-`getProductByID(id: string): IProduct | undefined` — товар по ID.  
-`saveProduct(product: IProduct | null): void` — сохраняет выбранный товар.  
-`getProduct(): IProduct | null` — возвращает выбранный товар.
-
-#### Класс `ShoppingCart`
-
-Управляет корзиной покупок.
-
-**Конструктор:**  
-`constructor()` — инициализирует пустую корзину.
-
-**Поля класса:**  
-`protected selectedProducts: IProduct[]` — товары в корзине.
-
-**Методы:**  
-`getSelectedProducts(): IProduct[]` — товары корзины.  
-`addSelectedProduct(product: IProduct): void` — добавляет товар.  
-`deleteSelectedProduct(id: string): void` — удаляет товар по ID.  
-`clearShoppingCart(): void` — очищает корзину.  
-`getTotal(): number` — общая стоимость.  
-`getSelectedProductsAmount(): number` — количество товаров.  
-`checkSelectedProduct(id: string): boolean` — проверка наличия товара.
-
-#### Класс `Buyer`
-
-Хранит и валидирует данные покупателя.
-
-**Конструктор:**  
-`constructor()` — инициализирует пустые данные.
-
-**Поля класса:**  
-`protected buyerData: IBuyer` — данные покупателя.
-
-**Методы:**  
-`savePaymentType(payment: TPayment): void` — сохраняет способ оплаты.  
-`saveAddress(address: string): void` — сохраняет адрес.  
-`saveEmail(email: string): void` — сохраняет email.  
-`savePhone(phone: string): void` — сохраняет телефон.  
-`getData(): IBuyer` — возвращает все данные.  
-`clearBuyerData(): void` — очищает данные.  
-`validate(): {payment: string, address: string, email: string, phone: string}` — валидация полей.
-
-### Слой коммуникации
-
-#### Класс `ServerApi`
-
-Работа с сервером через композицию с `Api`.
-
-**Конструктор:**  
-`constructor(api: IApi)` — принимает экземпляр `Api`.
-
-**Поля класса:**  
-`protected api: IApi` — объект для запросов.
-
-**Методы:**  
-`getProducts(): Promise<IResult>` — загрузка товаров (`/product/`).  
-`postOrder(orderRequest: IOrderRequest): Promise<IOrderResponse>` — отправка заказа (`/order/`).
+#### Класс `Communication` 
+Работа с сервером через композицию с `Api`. 
+**Конструктор:** `constructor(api: IApi)` — принимает экземпляр `IApi`. 
+**Поля класса:**   
+- `private api: IApi` — объект для запросов. 
+**Методы:**   
+- `getProductList(): Promise<IProduct[]>` — загрузка товаров (`/product/`).   
+- `sendOrder(order: IOrder): Promise<IOrderResponse>` — отправка заказа (`/order/`). 
