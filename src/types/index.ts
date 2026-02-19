@@ -13,7 +13,7 @@ export interface IProduct {
   description: string; 
   image: string;    
   category: string; 
-  price: number | null;    
+  price: number;    
 }  
 
 export interface IBuyer {  
