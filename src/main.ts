@@ -4,6 +4,7 @@ import { Communication } from './components/models/Communication';
 import { Catalog } from "./components/models/Catalog";            
 import { Cart } from "./components/models/Cart";                   
 import { Buyer } from "./components/models/Buyer";               
+import { IProduct } from './types';  
 import { apiProducts } from "./utils/data"; 
 import { API_URL } from "./utils/constants"; 
 
@@ -19,51 +20,43 @@ communication.getProductList()
   .then(products => { 
     catalog.setProducts(products); 
     console.log('Каталог с сервера:', catalog.getProducts()); 
+    testCatalogAndCart(products[0]);
   })
   .catch(err => console.error('Ошибка сервера:', err));
 
-// === 2. Тестируем Catalog ===
-catalog.setProducts(apiProducts.items.map(item => ({ 
-  ...item, 
-  price: item.price || 0  
-})));
-console.log("\n=== Тест Catalog ===");
-console.log("Все товары:", catalog.getProducts()); 
-
-const realProduct = catalog.getProductById(apiProducts.items[0].id); 
-console.log(`Товар по id '${realProduct?.id}':`, realProduct); 
-
-if (realProduct) {
-  catalog.setSelectedProduct(realProduct); 
-  console.log("Выбранный товар:", catalog.getSelectedProduct()); 
+function testCatalogAndCart(firstProduct: IProduct | undefined) {
+  console.log("\n=== Тест Catalog + Cart ===");  
+  
+  const realProduct = catalog.getProductById(firstProduct?.id || '');
+  console.log(`Товар по id '${realProduct?.id}':`, realProduct); 
+  
+  if (realProduct) {
+    catalog.setSelectedProduct(realProduct); 
+    console.log("Выбранный товар:", catalog.getSelectedProduct()); 
+    
+    // Тест Cart
+    console.log("Начальная корзина:", cart.getItems()); 
+    
+    cart.addItem(realProduct); 
+    console.log("После добавления:", cart.getItems()); 
+    console.log("Есть товар?", cart.hasItem(realProduct.id)); 
+    console.log("Стоимость:", cart.getTotalPrice()); 
+    console.log("Количество:", cart.getCount()); 
+    
+    cart.removeItem(realProduct); 
+    console.log("После удаления:", cart.getItems()); 
+    cart.clear(); 
+    console.log("После очистки:", cart.getItems()); 
+  }
 }
 
-// === 3. Тестируем Cart ===
-console.log("\n=== Тест Cart ===");
-console.log("Начальная корзина:", cart.getItems()); 
-
-if (realProduct) {
-  cart.addItem(realProduct); 
-  console.log("После добавления:", cart.getItems()); 
-  console.log("Есть товар?", cart.hasItem(realProduct.id)); 
-  console.log("Стоимость:", cart.getTotalPrice()); 
-  console.log("Количество:", cart.getCount()); 
-}
-
-if (realProduct) {
-  cart.removeItem(realProduct); 
-}
-console.log("После удаления:", cart.getItems()); 
-cart.clear(); 
-console.log("После очистки:", cart.getItems()); 
-
-// === 4. Тестируем Buyer ===
-console.log("\n=== Тест Buyer (реальный сценарий) ===");
+// === 2. Тестируем Buyer ===
+console.log("\n=== Тест Buyer ===");
 
 console.log("1. Изначально (пусто):", buyer.getData()); 
 console.log("1. Валидация (все ошибки):", buyer.validate()); 
 
-buyer.setData({ payment: "card" }); 
+buyer.setData({ payment: "online" });  
 console.log("2. Только payment:", buyer.getData()); 
 console.log("2. Валидация:", buyer.validate()); 
 
