@@ -106,34 +106,36 @@ yarn build
 `emit<T extends object>(event: string, data?: T): void` — генерация события.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` — создание обработчика события.
 
-### Данные 
+## Данные 
 
 Используются две сущности: **товар** и **покупатель**. 
 
 #### Интерфейс `IProduct` 
-Определяет структуру товара. 
+Определяет структуру товара **из реального API**. 
 **Поля интерфейса:**   
 - `id: string` — уникальный идентификатор товара   
 - `title: string` — название товара  
 - `description: string` — подробное описание товара   
 - `image: string` — путь к изображению товара   
 - `category: string` — категория товара   
-- `price: number` — цена товара (всегда указана) 
+- `price: number | null` — **цена товара (может отсутствовать)** 
 
-#### Интерфейс `IBuyer` 
-Определяет структуру данных покупателя для оформления заказа. 
+#### Интерфейс `IOrderRequest` 
+**Реальные данные для POST `/order/`**:
 **Поля интерфейса:**   
-- `payment: TPayment` — способ оплаты (`'card' | 'cash'`)  
+- `payment: TPayment` — способ оплаты (`'online' | 'offline'`)  
 - `address: string` — адрес доставки   
 - `email: string` — email покупателя   
-- `phone: string` — телефон покупателя 
+- `phone: string` — телефон покупателя
+- `total: number` — общая сумма заказа
+- `items: string[]` — **массив ID товаров**
 
-**Тип `TPayment`:** `type TPayment = 'card' | 'cash'`
+**Тип `TPayment`:** `type TPayment = 'online' | 'offline'`
 
 ### Модели данных 
 
 #### Класс `Catalog` 
-Хранит каталог товаров и выбранный товар. 
+
 **Конструктор:** `constructor()` — инициализирует пустые списки товаров. 
 **Поля класса:**   
 - `private products: IProduct[]` — массив всех товаров.   
@@ -146,7 +148,7 @@ yarn build
 - `getSelectedProduct(): IProduct | null` — возвращает выбранный товар. 
 
 #### Класс `Cart` 
-Управляет корзиной покупок. 
+
 **Конструктор:** `constructor()` — инициализирует пустую корзину. 
 **Поля класса:**   
 - `private items: IProduct[]` — товары в корзине. 
@@ -160,8 +162,8 @@ yarn build
 - `hasItem(id: string): boolean` — проверка наличия товара. 
 
 #### Класс `Buyer` 
-Хранит и валидирует данные покупателя. 
-**Конструктор:** `constructor(data?: Partial<IBuyer>)` — пустые или начальные данные. 
+
+**Конструктор:** `constructor()` — **пустой конструктор**. 
 **Поля класса:**   
 - `private payment: TPayment | ""` — способ оплаты  
 - `private email: string` — email покупателя
@@ -169,17 +171,17 @@ yarn build
 - `private address: string` — адрес доставки
 **Методы:**   
 - `setData(data: Partial<IBuyer>): void` — обновляет данные (по частям).   
-- `getData(): IBuyer` — возвращает все данные.   
+- `getData(): {payment: TPayment | '', email: string, phone: string, address: string}` — **честный тип без cast'ов**.   
 - `clear(): void` — очищает данные.   
 - `validate(): Partial<Record<keyof IBuyer, string>>` — возвращает ошибки валидации. 
 
 ### Слой коммуникации 
 
 #### Класс `Communication` 
-Работа с сервером через композицию с `Api`. 
+Работа с **реальным Postman API** через композицию с `Api`. 
 **Конструктор:** `constructor(api: IApi)` — принимает экземпляр `IApi`. 
 **Поля класса:**   
 - `private api: IApi` — объект для запросов. 
 **Методы:**   
-- `getProductList(): Promise<IProduct[]>` — загрузка товаров (`/product/`).   
-- `sendOrder(order: IOrder): Promise<IOrderResponse>` — отправка заказа (`/order/`). 
+- `getProductList(): Promise<IProduct[]>` — загрузка товаров (`GET /product/`).   
+- `sendOrder(orderRequest: IOrderRequest): Promise<IOrderResponse>` — **отправка заказа** (`POST /order/`).
