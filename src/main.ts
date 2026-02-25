@@ -61,7 +61,7 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
 
 events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
-  console.log('🛒 Корзина:', cart.getCount(), 'товаров');
+  console.log('Корзина:', cart.getCount(), 'товаров');
 });
 
 // 3. СОБЫТИЯ VIEW 
@@ -123,18 +123,31 @@ events.on('order:next', () => {
   modal.open();
 });
 
-events.on('order:pay', () => {
+events.on('order:pay', async () => {
   const errors = buyer.validate();
   if (Object.keys(errors).length === 0) {
-    // Отправка заказа на сервер
-    console.log('Заказ оформлен:', buyer.getData());
-    cart.clear();
-    buyer.clear();
+    const orderData: IOrderRequest = {
+      ...buyer.getData(),
+      total: cart.getTotalPrice(),
+      items: cart.getItems().map(item => item.id)
+    };
     
-    const success = new Success(cloneTemplate('#success'), () => modal.close());
-    success.render({ total: cart.getTotalPrice() });
-    modal.content = success.container;
-    modal.open();
+    try {
+      await communication.sendOrder(orderData);
+      console.log('Заказ успешно отправлен!');
+
+      cart.clear();
+      buyer.clear();
+
+      const success = new Success(cloneTemplate('#success'), () => modal.close());
+      success.render({ total: orderData.total });
+      modal.content = success.container;
+      modal.open();
+    } catch (error) {
+      console.error('Ошибка отправки заказа:', error);
+    }
+  } else {
+    console.log('Ошибки валидации:', errors);
   }
 });
 
