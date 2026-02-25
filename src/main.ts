@@ -1,73 +1,120 @@
-import './scss/styles.scss'; 
-import { Api } from './components/base/Api'; 
-import { Communication } from './components/models/Communication';  
-import { Catalog } from "./components/models/Catalog";            
-import { Cart } from "./components/models/Cart";                   
-import { Buyer } from "./components/models/Buyer";               
-import { IProduct } from './types';  
-import { apiProducts } from "./utils/data"; 
-import { API_URL } from "./utils/constants"; 
+import './scss/styles.scss';
+import { Api, EventEmitter } from './components/base';
+import { Catalog, Cart, Buyer, Communication } from './components/models';
+import { 
+  Gallery, Header, Modal, Basket,
+  CardCatalog, CardPreview, CardBasket,
+  OrderForm, ContactsForm, Success 
+} from './components/views';
+import { cloneTemplate, ensureElement } from './utils/utils';
+import { API_URL } from './utils/constants';
+import { IProduct } from './types';
 
-// Создаём экземпляры классов
-const api = new Api(API_URL); 
-const communication = new Communication(api); 
-const catalog = new Catalog(); 
-const cart = new Cart(); 
-const buyer = new Buyer(); 
+console.log('Web-Larek запускается...');
 
-// === 1. Получаем товары с сервера ===
-communication.getProductList() 
-  .then(products => { 
-    catalog.setProducts(products); 
-    console.log('Каталог с сервера:', catalog.getProducts()); 
-    testCatalogAndCart(products[0]);
-  })
-  .catch(err => console.error('Ошибка сервера:', err));
+// Инициализация
+const events = new EventEmitter();
+const api = new Api(API_URL);
+const communication = new Communication(api);
 
-function testCatalogAndCart(firstProduct: IProduct | undefined) {
-  console.log("\n=== Тест Catalog + Cart ===");  
+const catalog = new Catalog(events);
+const cart = new Cart(events);
+const buyer = new Buyer(events);
+
+// VIEW КОМПОНЕНТЫ
+const gallery = new Gallery(ensureElement('.gallery'));
+const header = new Header(ensureElement('.header'), events);
+const modal = new Modal(ensureElement('#modal-container'), events);
+
+// 1. ЗАГРУЗКА КАТАЛОГА
+communication.getProductList().then(products => {
+  console.log('Загружен каталог:', products.length, 'товаров');
+  catalog.setProducts(products);
+});
+
+// 2. СОБЫТИЯ МОДЕЛЕЙ
+events.on('catalog:productsChanged', () => {
+  console.log('Рендер каталога...');
+  const items = catalog.getProducts().map(product => {
+    const card = new CardCatalog(cloneTemplate('#card-catalog'), events);
+    card.render({ 
+      title: product.title, 
+      price: product.price,
+      image: product.image, 
+      category: product.category 
+    });
+    (card.container as HTMLElement).dataset.productId = product.id;
+    return card.container;
+  });
+  gallery.catalog = items;
+});
+
+events.on('cart:itemsChanged', () => {
+  header.counter = cart.getCount();
   
-  const realProduct = catalog.getProductById(firstProduct?.id || '');
-  console.log(`Товар по id '${realProduct?.id}':`, realProduct); 
+  console.log('🛒 Корзина:', cart.getCount(), 'товаров');
+});
+
+// 3. КЛИК ПО КАРТОЧКЕ ТОВАРА
+events.on('productCard:click', (event: MouseEvent) => {
+  const target = event.target as HTMLElement;
+  const productId = target.closest('.gallery__item')?.dataset.productId;
+  const product = catalog.getProductById(productId!);
   
-  if (realProduct) {
-    catalog.setSelectedProduct(realProduct); 
-    console.log("Выбранный товар:", catalog.getSelectedProduct()); 
-    
-    // Тест Cart
-    console.log("Начальная корзина:", cart.getItems()); 
-    
-    cart.addItem(realProduct); 
-    console.log("После добавления:", cart.getItems()); 
-    console.log("Есть товар?", cart.hasItem(realProduct.id)); 
-    console.log("Стоимость:", cart.getTotalPrice()); 
-    console.log("Количество:", cart.getCount()); 
-    
-    cart.removeItem(realProduct); 
-    console.log("После удаления:", cart.getItems()); 
-    cart.clear(); 
-    console.log("После очистки:", cart.getItems()); 
+  if (product) {
+    catalog.setSelectedProduct(product);
   }
-}
+});
 
-// === 2. Тестируем Buyer ===
-console.log("\n=== Тест Buyer ===");
+events.on('catalog:selectedChanged', (product: IProduct) => {
+  const isInCart = cart.hasItem(product.id);
+  const cardPreview = new CardPreview(cloneTemplate('#card-preview'), {
+    onClick: () => {
+      if (isInCart) {
+        cart.removeItem(product);
+      } else {
+        cart.addItem(product);
+      }
+      modal.close();
+    }
+  });
+  
+  cardPreview.render({
+    title: product.title,
+    price: product.price,
+    image: product.image,
+    category: product.category,
+    description: product.description
+  });
+  
+  cardPreview.setButtonText(isInCart ? 'Удалить из корзины' : 'В корзину');
+  
+  modal.content = cardPreview.container;
+  modal.open();
+});
 
-console.log("1. Изначально (пусто):", buyer.getData()); 
-console.log("1. Валидация (все ошибки):", buyer.validate()); 
+// 4. ОТКРЫТИЕ КОРЗИНЫ
+events.on('cart:open', () => {
+  const items = cart.getItems().map((product, index) => {
+    const cardBasket = new CardBasket(cloneTemplate('#card-basket'), events);
+    cardBasket.render({
+      title: product.title,
+      price: product.price,
+      index: index + 1
+    });
+    cardBasket.id = product.id;
+    return cardBasket.container;
+  });
 
-buyer.setData({ payment: "online" });  
-console.log("2. Только payment:", buyer.getData()); 
-console.log("2. Валидация:", buyer.validate()); 
+  const basketView = new Basket(cloneTemplate('#basket'), events);
+  basketView.render({
+    items,
+    price: cart.getTotalPrice()
+  });
+  
+  basketView.setButtonDisabled(cart.getCount() === 0);
+  
+  modal.content = basketView.container;
+  modal.open();
+});
 
-buyer.setData({ email: "user@example.com" }); 
-console.log("3. +email:", buyer.getData()); 
-console.log("3. Валидация:", buyer.validate()); 
-
-buyer.setData({ phone: "1234567890", address: "ул. Пушкина, 1" }); 
-console.log("4. Полные данные:", buyer.getData()); 
-console.log("4. Валидация:", buyer.validate()); 
-
-buyer.clear(); 
-console.log("5. После очистки:", buyer.getData()); 
-console.log("5. Валидация (все ошибки):", buyer.validate());
