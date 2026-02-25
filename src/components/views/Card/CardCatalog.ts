@@ -1,11 +1,10 @@
-import { Card, TCardCatalog } from './Card';
+import { Card } from '../Card';
 import { categoryMap, CDN_URL } from '../../../utils/constants';
 import { IEvents } from '../../base/Events';
+import { IProduct } from '../../../types';
 import { ensureElement } from '../../../utils/utils';
 
-export type TCardCatalog = Pick<IProduct, 'image' | 'category'>;
-
-export class CardCatalog extends Card<TCardCatalog> {
+export class CardCatalog extends Card {
   protected imageElement!: HTMLImageElement;
   protected categoryElement!: HTMLElement;
 
@@ -13,9 +12,10 @@ export class CardCatalog extends Card<TCardCatalog> {
     super(container);
     this.imageElement = ensureElement('.card__image', container);
     this.categoryElement = ensureElement('.card__category', container);
-    
+
     container.addEventListener('click', () => {
-      events.emit('productCard:click', {}); // id через dataset
+      const productId = (container as HTMLElement).dataset.productId;
+      this.events.emit('products:select', productId);
     });
   }
 
