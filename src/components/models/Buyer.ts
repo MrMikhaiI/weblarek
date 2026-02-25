@@ -4,7 +4,7 @@ import { IEvents } from "../base/Events";
 type TBuyerErrors = Partial<Record<keyof IBuyer, string>>; 
 
 export class Buyer {  
-  private payment: TPayment = '' as TPayment;
+  private payment: TPayment | '' = '';
   private email: string = '';       
   private phone: string = '';      
   private address: string = '';    
