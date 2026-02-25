@@ -8,7 +8,7 @@ export class CardCatalog extends Card {
   protected imageElement!: HTMLImageElement;
   protected categoryElement!: HTMLElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {
+  constructor(container: HTMLElement, protected events: IEvents) {  
     super(container);
     this.imageElement = ensureElement('.card__image', container);
     this.categoryElement = ensureElement('.card__category', container);
@@ -17,6 +17,13 @@ export class CardCatalog extends Card {
       const productId = (container as HTMLElement).dataset.productId;
       this.events.emit('products:select', productId);
     });
+  }
+
+  render(product: IProduct) {  
+    this.title = product.title;
+    this.price = product.price;
+    this.image = product.image;
+    this.category = product.category;
   }
 
   set image(value: string) {
