@@ -21,7 +21,7 @@ export class Form extends Component<IForm> {
     
     this.submitButton.disabled = true;
     this.submitButton.classList.add('button_disabled');
-    
+
     this.formElement.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!this.submitButton.disabled) {
