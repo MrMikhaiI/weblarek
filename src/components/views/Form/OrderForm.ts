@@ -9,14 +9,14 @@ export class OrderForm extends Form {
   constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
     
-    this.paymentButtons = container.querySelectorAll('button[name]');
+    this.paymentButtons = container.querySelectorAll('button[name="payment"]');
     this.addressInput = ensureElement('input[name="address"]', container);
     
     this.paymentButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         events.emit('order:changed', { 
           field: 'payment', 
-          value: btn.name as 'online' | 'offline' 
+          value: btn.dataset.payment! 
         });
       });
     });
@@ -31,7 +31,7 @@ export class OrderForm extends Form {
 
   set payment(value: string) {
     this.paymentButtons.forEach(btn => {
-      btn.classList.toggle('button_alt-active', btn.name === value);
+      btn.classList.toggle('button_alt-active', btn.dataset.payment === value);
     });
   }
 
