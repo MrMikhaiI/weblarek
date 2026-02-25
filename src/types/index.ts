@@ -41,3 +41,7 @@ export interface IOrderResponse {
   id: string;               
   total: number;
 }
+
+export interface ISuccess {
+  total: number;
+}
