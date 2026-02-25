@@ -186,18 +186,22 @@ yarn build
 - `getProductList(): Promise<IProduct[]>` — загрузка товаров (`GET /product/`).   
 - `sendOrder(orderRequest: IOrderRequest): Promise<IOrderResponse>` — **отправка заказа** (`POST /order/`).
 
-### Слой Представления (View)
+## Слой Представления (View)
 
-#### Иерархия классов Card
-- **Card** (базовый) — title, price
-  - **CardCatalog** — карточка каталога (`products:select`)
-  - **CardPreview** — модальное окно товара (`product:buy`)  
-  - **CardBasket** — карточка корзины (`product:remove`)
+### Иерархия классов Card
+- **Card** (абстрактный) — title, price
+  - **CardCatalog** — каталог (`products:select`)
+  - **CardPreview** — модалка (`product:buy`)
+  - **CardBasket** — корзина (`product:remove`)
 
-#### Иерархия классов Form
-- **Form** (базовый) — валидация, submit
+### Иерархия Form
+- **Form** (абстрактный) — валидация
   - **OrderForm** — оплата+адрес (`order:changed`)
-  - **ContactsForm** — контакты (`contacts:changed`)
+  - **ContactsForm** — email+телефон (`contacts:changed`)
+
+## Все события MVP
+**Модели:** `catalog:productsChanged`, `cart:itemsChanged`, `buyer:dataChanged`
+**View:** `products:select`, `product:buy`, `cart:open`, `order:start/next/pay`
 
 #### Остальные компоненты
 - **Gallery** — каталог товаров
