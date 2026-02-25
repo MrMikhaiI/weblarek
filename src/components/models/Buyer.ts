@@ -1,9 +1,10 @@
 import { IBuyer, TPayment } from "../../types";  
 import { IEvents } from "../base/Events";
+
 type TBuyerErrors = Partial<Record<keyof IBuyer, string>>; 
 
 export class Buyer {  
-  private payment: TPayment | '' = '';  
+  private payment: TPayment = '' as TPayment;
   private email: string = '';       
   private phone: string = '';      
   private address: string = '';    
@@ -31,7 +32,7 @@ export class Buyer {
   } 
 
   clear(): void {  
-    this.payment = '';  
+    this.payment = '' as TPayment;
     this.email = '';  
     this.phone = '';  
     this.address = '';  
