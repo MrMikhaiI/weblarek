@@ -11,8 +11,6 @@ import { cloneTemplate, ensureElement } from './utils/utils';
 import { API_URL } from './utils/constants';
 import { IProduct } from './types';
 
-console.log('Web-Larek запускается...');
-
 // Инициализация
 const events = new EventEmitter();
 const api = new Api(API_URL);
@@ -29,13 +27,11 @@ const modal = new Modal(ensureElement('#modal-container'), events);
 
 // 1. ЗАГРУЗКА КАТАЛОГА
 communication.getProductList().then(products => {
-  console.log('Загружен каталог:', products.length, 'товаров');
   catalog.setProducts(products);
 });
 
 // 2. СОБЫТИЯ МОДЕЛЕЙ 
 events.on('catalog:productsChanged', () => {
-  console.log('Рендер каталога...');
   const products = catalog.getProducts();
   const items = products.map(product => {
     const card = new CardCatalog(cloneTemplate('#card-catalog'), events);
@@ -61,7 +57,6 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
 
 events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
-  console.log('Корзина:', cart.getCount(), 'товаров');
 });
 
 // 3. СОБЫТИЯ VIEW 
