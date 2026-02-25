@@ -27,6 +27,13 @@ export class OrderForm extends Form {
         value: this.addressInput.value 
       });
     });
+
+    this.formElement.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!this.submitButton.disabled) {
+        events.emit('order:next');  
+      }
+    });
   }
 
   set payment(value: string) {
