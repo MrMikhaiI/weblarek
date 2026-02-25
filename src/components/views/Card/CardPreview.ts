@@ -24,11 +24,13 @@ export class CardPreview extends Card {
     this.descriptionElement.textContent = product.description || '';
   }
 
-  setButtonText(text: string) {
+  setButtonText(text: string, product?: IProduct) { 
     this.button.textContent = text;
-    this.button.disabled = !product.price; 
-    if (!product.price) {
+    if (product && !product.price) {  
+      this.button.disabled = true;
       this.button.textContent = 'Недоступно';
+    } else {
+      this.button.disabled = false;
     }
-  }
-}
+  }  
+}   
