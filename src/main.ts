@@ -53,7 +53,7 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
   });
   
   cardPreview.render(product);
-  cardPreview.setButtonText(isInCart ? 'Удалить из корзины' : 'Купить');
+  cardPreview.setButtonText(isInCart ? 'Удалить из корзины' : 'Купить', product);
   
   modal.content = cardPreview.container;
   modal.open();
