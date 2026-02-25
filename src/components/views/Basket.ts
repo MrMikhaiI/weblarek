@@ -5,6 +5,7 @@ import { IEvents } from '../base/Events';
 interface IBasket {
   items: HTMLElement[];
   price: number;
+  isEmpty: boolean;
 }
 
 export class Basket extends Component<IBasket> {
@@ -20,20 +21,20 @@ export class Basket extends Component<IBasket> {
     this.priceElement = ensureElement('.basket__price', container);
     
     this.orderButton.addEventListener('click', () => {
-      events.emit('order:open');
+      events.emit('order:start');
     });
   }
 
-  set items(items: HTMLElement[]) {
+  render({ items, price, isEmpty }: IBasket) {
     this.listElement.innerHTML = '';
-    if (items.length === 0) {
+    if (isEmpty) {
       this.listElement.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
     } else {
       this.listElement.append(...items);
     }
-  }
-
-  set price(value: number) {
-    this.priceElement.textContent = `${value} синапсов`;
+    
+    this.priceElement.textContent = `${price} синапсов`;
+    this.orderButton.disabled = isEmpty;
+    this.orderButton.classList.toggle('button_disabled', isEmpty);
   }
 }
