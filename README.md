@@ -185,3 +185,41 @@ yarn build
 **Методы:**   
 - `getProductList(): Promise<IProduct[]>` — загрузка товаров (`GET /product/`).   
 - `sendOrder(orderRequest: IOrderRequest): Promise<IOrderResponse>` — **отправка заказа** (`POST /order/`).
+
+### Слой Представления (View)
+
+#### Иерархия классов Card
+- **Card** (базовый) — title, price
+  - **CardCatalog** — карточка каталога (`products:select`)
+  - **CardPreview** — модальное окно товара (`product:buy`)  
+  - **CardBasket** — карточка корзины (`product:remove`)
+
+#### Иерархия классов Form
+- **Form** (базовый) — валидация, submit
+  - **OrderForm** — оплата+адрес (`order:changed`)
+  - **ContactsForm** — контакты (`contacts:changed`)
+
+#### Остальные компоненты
+- **Gallery** — каталог товаров
+- **Header** — счётчик корзины (`cart:open`)
+- **Modal** — модальные окна
+- **Basket** — корзина (`order:start`)
+- **Success** — успешная оплата
+
+## События приложения
+
+**Модели данных:**
+- `catalog:productsChanged` — обновление каталога
+- `catalog:selectedChanged` — выбор товара  
+- `cart:itemsChanged` — изменение корзины
+- `buyer:dataChanged` — изменение данных покупателя
+
+**Представления:**
+- `products:select` — клик по карточке каталога
+- `product:buy` — купить/удалить товар
+- `product:remove` — удалить из корзины
+- `cart:open` — открыть корзину
+- `order:start` — начать оформление
+- `order:next` — следующий шаг формы
+- `order:pay` — оплатить заказ
+- `order:changed` / `contacts:changed` — изменение полей форм
