@@ -8,6 +8,7 @@ export class Header extends Component<{ counter: number }> {
 
   constructor(container: HTMLElement, protected events: IEvents) {
     super(container);
+    
     this.basketButton = ensureElement('.header__basket', container);
     this.counterElement = ensureElement('.header__basket-counter', container);
     
