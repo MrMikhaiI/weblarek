@@ -1,13 +1,15 @@
 import { IProduct } from "../../types";
-
+import { IEvents } from "../base/Events";
 /**
  * Класс Catalog — управляет списком товаров и выбранным товаром
  */
 export class Catalog {
   private products: IProduct[] = [];    
   private selectedProduct: IProduct | null;
+  private events?: IEvents;
 
-  constructor() {                          
+  constructor(events?: IEvents) {
+    this.events = events;
     this.products = [];                   
     this.selectedProduct = null;
   }
@@ -41,6 +43,7 @@ export class Catalog {
    */
   setSelectedProduct(product: IProduct): void {
     this.selectedProduct = product;
+    this.events?.emit('catalog:productsChanged');
   }
 
   /**
