@@ -1,4 +1,3 @@
-import { Api } from '../base/Api';  
 import { IApi, IProduct, IApiProductsResponse, IOrderRequest, IOrderResponse } from '../../types';
 import { API_URL } from '../../utils/constants';  
 
