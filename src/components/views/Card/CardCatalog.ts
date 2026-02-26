@@ -1,4 +1,4 @@
-import { Card } from '../Card';
+import { Card } from './index';
 import { categoryMap, CDN_URL } from '../../../utils/constants';
 import { IEvents } from '../../base/Events';
 import { IProduct } from '../../../types';
