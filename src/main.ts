@@ -67,7 +67,6 @@ events.on('cart:itemsChanged', () => {
       const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
         onDelete: (id: string) => events.emit('product:remove', { id })
       });
-      card.render(product);
       return card.container as HTMLElement;
     }),
     price: cart.getTotalPrice(),
@@ -130,12 +129,12 @@ events.on('order:next', () => {
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
-  if (Object.keys(errors).length === 0 && buyer.getData().payment !== '') {
-  const orderData: IOrderRequest = {
-    ...buyer.getData(),
-    total: cart.getTotalPrice(),
-    items: cart.getItems().map(item => item.id)
-  };
+  if (Object.keys(errors).length === 0 && buyer.getData().payment) { 
+    const orderData: IOrderRequest = {
+      ...buyer.getData(),
+      total: cart.getTotalPrice(),
+      items: cart.getItems().map(item => item.id)
+    };
     
     try {
       const response = await communication.sendOrder(orderData); 
