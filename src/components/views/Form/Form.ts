@@ -16,7 +16,7 @@ export class Form extends Component<IForm> {
     super(container);
     
     this.formElement = container;
-    this.submitButton = ensureElement('button[type="submit"]', container);
+    this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', container);
     this.errorsElement = ensureElement('.form__errors', container);
     
     this.submitButton.disabled = true;
