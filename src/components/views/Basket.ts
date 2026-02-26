@@ -17,7 +17,7 @@ export class Basket extends Component<IBasket> {
     super(container);
     
     this.listElement = ensureElement('.basket__list', container);
-    this.orderButton = ensureElement('.basket__button', container);
+    this.orderButton = ensureElement<HTMLButtonElement>('.basket__button', container);
     this.priceElement = ensureElement('.basket__price', container);
     
     this.orderButton.addEventListener('click', () => {
