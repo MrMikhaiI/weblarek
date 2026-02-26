@@ -10,7 +10,8 @@ export class OrderForm extends Form {
     super(container, events);
     
     this.paymentButtons = container.querySelectorAll('button[name="payment"]');
-    this.addressInput = ensureElement('input[name="address"]', container);
+    this.addressInput = ensureElement<HTMLInputElement>('input[name="address"]', container);
+
     
     this.paymentButtons.forEach(btn => {
       btn.addEventListener('click', () => {
