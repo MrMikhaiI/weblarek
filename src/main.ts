@@ -7,7 +7,7 @@ import {
 } from './components/views/index';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { API_URL } from './utils/constants';
-import { IOrderRequest } from './types';
+import { IOrderRequest, IProduct } from './types';
 
 // Инициализация моделей
 const events = new EventEmitter();
@@ -41,11 +41,10 @@ events.on('catalog:productsChanged', () => {
     const card = new CardCatalog(cloneTemplate('#card-catalog'), events, 
       (id: string) => events.emit('products:select', { id })
     );
-    return card.render(product); 
+    return card.render(product) as HTMLElement; 
   });  
   gallery.catalog = items;
 });
-
 
 events.on('catalog:selectedChanged', (product: IProduct) => {
   const cardPreview = new CardPreview(cloneTemplate('#card-preview'), {
@@ -56,7 +55,7 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
   const isInCart = cart.hasItem(product.id);
   cardPreview.setButtonText(isInCart ? 'Удалить из корзины' : 'Купить', product);
   
-  modal.content = cardPreview.container;
+  modal.content = cardPreview.render(product) as HTMLElement;
   modal.open();
 });
 
@@ -69,7 +68,7 @@ events.on('cart:itemsChanged', () => {
         (id: string) => events.emit('product:remove', { id })  
       );
       card.render(product);
-      return card.render();
+      return card.container as HTMLElement;
     }),
     price: cart.getTotalPrice(),
     isEmpty: cart.getCount() === 0
@@ -86,8 +85,8 @@ events.on('buyer:dataChanged', () => {
 });
 
 // 3. СОБЫТИЯ VIEW
-events.on('products:select', (id: string) => {
-  const product = catalog.getProductById(id);
+events.on('products:select', (event: { id: string }) => {
+  const product = catalog.getProductById(event.id);
   if (product) {
     catalog.setSelectedProduct(product);
   }
@@ -105,8 +104,8 @@ events.on('product:buy:toggle', () => {
   modal.close();
 });
 
-events.on('product:remove', (id: string) => {
-  const product = catalog.getProductById(id);
+events.on('product:remove', (event: { id: string }) => {
+  const product = catalog.getProductById(event.id);
   if (product) {
     cart.removeItem(product);
   }
@@ -131,12 +130,12 @@ events.on('order:next', () => {
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
-  if (Object.keys(errors).length === 0) {
-    const orderData: IOrderRequest = {
-      ...buyer.getData(),
-      total: cart.getTotalPrice(),
-      items: cart.getItems().map(item => item.id)
-    };
+  if (Object.keys(errors).length === 0 && buyer.getData().payment !== '') {
+  const orderData: IOrderRequest = {
+    ...buyer.getData(),
+    total: cart.getTotalPrice(),
+    items: cart.getItems().map(item => item.id)
+  };
     
     try {
       const response = await communication.sendOrder(orderData); 
@@ -145,7 +144,7 @@ events.on('order:pay', async () => {
       buyer.clear();
 
       successView.render({ total: response.total }); 
-      modal.content = successView.render({ total: 0 });
+      modal.content = successView.render({ total: response.total });
       modal.open();
     } catch (error) { }
   }
