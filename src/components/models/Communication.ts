@@ -1,4 +1,4 @@
-import { IApi, IProduct, IApiProductsResponse, IOrderRequest, IOrderResponse } from '../../types';
+import { IApi, IProduct, IOrderRequest, IOrderResponse } from '../../types'; 
 import { API_URL } from '../../utils/constants';  
 
 export class Communication {  
@@ -9,11 +9,12 @@ export class Communication {
   } 
 
   async getProductList(): Promise<IProduct[]> {  
-    const response = await this.api.get<IApiProductsResponse>(`${API_URL}/product/`);  
-    return response.items;  
+    const response = await this.api.get(`${API_URL}/product/`);  
+    return (response as any).items as IProduct[];  
   } 
 
   async sendOrder(orderRequest: IOrderRequest): Promise<IOrderResponse> {  
-    return await this.api.post<IOrderResponse>(`${API_URL}/order/`, orderRequest);  
+    const response = await this.api.post(`${API_URL}/order/`, orderRequest);  
+    return response as IOrderResponse;  
   } 
 }
