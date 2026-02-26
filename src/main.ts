@@ -1,17 +1,15 @@
 import './scss/styles.scss';
-import { Api, EventEmitter } from './components/base';
-import { Catalog, Cart, Buyer, Communication } from './components/models';
+import { Api, EventEmitter } from './components/base/index';
+import { Catalog, Cart, Buyer, Communication } from './components/models/index';
 import { 
-  Gallery, Header, Modal, 
-  CardCatalog, CardPreview, CardBasket,
-  OrderForm, ContactsForm, Success,
-  Basket 
-} from './components/views';
+  Gallery, Header, Modal, CardCatalog, CardPreview, CardBasket,
+  OrderForm, ContactsForm, Success, Basket 
+} from './components/views/index';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { API_URL } from './utils/constants';
-import { IProduct } from './types';
+import { IOrderRequest } from './types';
 
-// Инициализация
+// Инициализация моделей
 const events = new EventEmitter();
 const api = new Api(API_URL);
 const communication = new Communication(api);
@@ -20,35 +18,42 @@ const catalog = new Catalog(events);
 const cart = new Cart(events);
 const buyer = new Buyer(events);
 
-// VIEW КОМПОНЕНТЫ
+// VIEW КОМПОНЕНТЫ (статичные)
 const gallery = new Gallery(ensureElement('.gallery'));
 const header = new Header(ensureElement('.header'), events);
 const modal = new Modal(ensureElement('#modal-container'), events);
+
+// МОДАЛЬНЫЕ VIEW (статичные экземпляры)
+const orderForm = new OrderForm(cloneTemplate('#order-form'), events);
+const contactsForm = new ContactsForm(cloneTemplate('#contacts-form'), events);
+const successView = new Success(cloneTemplate('#success'), () => modal.close());
+const basketView = new Basket(cloneTemplate('#basket'), events);
 
 // 1. ЗАГРУЗКА КАТАЛОГА
 communication.getProductList().then(products => {
   catalog.setProducts(products);
 });
 
-// 2. СОБЫТИЯ МОДЕЛЕЙ 
+// 2. СОБЫТИЯ МОДЕЛЕЙ
 events.on('catalog:productsChanged', () => {
   const products = catalog.getProducts();
   const items = products.map(product => {
-    const card = new CardCatalog(cloneTemplate('#card-catalog'), events);
-    card.render(product);
-    (card.container as HTMLElement).dataset.productId = product.id;
-    return card.container;
-  });
+    const card = new CardCatalog(cloneTemplate('#card-catalog'), events, 
+      (id) => events.emit('products:select', id) 
+    );
+    return card.render(product); 
+  });  
   gallery.catalog = items;
 });
 
+
 events.on('catalog:selectedChanged', (product: IProduct) => {
-  const isInCart = cart.hasItem(product.id);
   const cardPreview = new CardPreview(cloneTemplate('#card-preview'), {
-    onClick: () => events.emit('product:buy', product.id)
+    onClick: () => events.emit('product:buy:toggle')
   });
   
   cardPreview.render(product);
+  const isInCart = cart.hasItem(product.id);
   cardPreview.setButtonText(isInCart ? 'Удалить из корзины' : 'Купить', product);
   
   modal.content = cardPreview.container;
@@ -57,9 +62,30 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
 
 events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
+  
+  basketView.render({
+    items: cart.getItems().map(product => {
+      const card = new CardBasket(cloneTemplate('#card-basket'), events, 
+        (id) => events.emit('product:remove', id)  // ✅ Колбэк как в CardCatalog!
+      );
+      card.render(product);
+      return card.render();
+    }),
+    price: cart.getTotalPrice(),
+    isEmpty: cart.getCount() === 0
+  });
 });
 
-// 3. СОБЫТИЯ VIEW 
+events.on('buyer:dataChanged', () => {
+  const errors = buyer.validate();
+
+  orderForm.errors = Object.values(errors);
+  contactsForm.errors = Object.values(errors);
+  orderForm.valid = Object.keys(errors).length === 0;
+  contactsForm.valid = Object.keys(errors).length === 0;
+});
+
+// 3. СОБЫТИЯ VIEW
 events.on('products:select', (id: string) => {
   const product = catalog.getProductById(id);
   if (product) {
@@ -67,10 +93,10 @@ events.on('products:select', (id: string) => {
   }
 });
 
-events.on('product:buy', (id: string) => {
-  const product = catalog.getProductById(id);
+events.on('product:buy:toggle', () => {
+  const product = catalog.getSelectedProduct();
   if (product) {
-    if (cart.hasItem(id)) {
+    if (cart.hasItem(product.id)) {
       cart.removeItem(product);
     } else {
       cart.addItem(product);
@@ -87,33 +113,18 @@ events.on('product:remove', (id: string) => {
 });
 
 events.on('cart:open', () => {
-  const items = cart.getItems().map(product => {
-    const card = new CardBasket(cloneTemplate('#card-basket'), {
-      onDelete: () => events.emit('product:remove', product.id)
-    });
-    card.render(product);
-    return card.container;
-  });
-
-  const basket = new Basket(cloneTemplate('#basket'), events);
-  basket.render({
-    items,
-    price: cart.getTotalPrice(),
-    isEmpty: cart.getCount() === 0
-  });
-  
-  modal.content = basket.container;
+  modal.content = basketView.container;
   modal.open();
 });
 
 events.on('order:start', () => {
-  const orderForm = new OrderForm(cloneTemplate('#order-form'), events);
+  orderForm.render({});
   modal.content = orderForm.container;
   modal.open();
 });
 
 events.on('order:next', () => {
-  const contactsForm = new ContactsForm(cloneTemplate('#contacts-form'), events);
+  contactsForm.render({});
   modal.content = contactsForm.container;
   modal.open();
 });
@@ -128,26 +139,20 @@ events.on('order:pay', async () => {
     };
     
     try {
-      await communication.sendOrder(orderData);
-      console.log('Заказ успешно отправлен!');
-
+      const response = await communication.sendOrder(orderData); 
+      
       cart.clear();
       buyer.clear();
 
-      const success = new Success(cloneTemplate('#success'), () => modal.close());
-      success.render({ total: orderData.total });
-      modal.content = success.container;
+      successView.render({ total: response.total }); 
+      modal.content = successView.container;
       modal.open();
-    } catch (error) {
-      console.error('Ошибка отправки заказа:', error);
-    }
-  } else {
-    console.log('Ошибки валидации:', errors);
+    } catch (error) { }
   }
 });
 
 events.on('order:changed', (data: {field: string, value: string}) => {
-  buyer.setData({ [data.field]: data.value as any });
+  buyer.setData({ [data.field]: data.value as TPayment | string });
 });
 
 events.on('contacts:changed', (data: {field: string, value: string}) => {
