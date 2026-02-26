@@ -21,7 +21,7 @@ export class CardCatalog extends Card<IProduct> {
 
   render(product: IProduct): HTMLElement {  
     this.title = product.title;
-    this.price = product.price;
+    this.price = product.price ?? 0;
     this.image = product.image;
     this.category = product.category;
     return this.container;  
