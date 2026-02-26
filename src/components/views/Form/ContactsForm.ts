@@ -9,8 +9,9 @@ export class ContactsForm extends Form {
   constructor(container: HTMLFormElement, events: IEvents) {
     super(container, events);
     
-    this.emailInput = ensureElement('input[name="email"]', container);
-    this.phoneInput = ensureElement('input[name="phone"]', container);
+    this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', container);
+    this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', container);
+
     
     this.emailInput.addEventListener('input', () => {
       events.emit('contacts:changed', { 
