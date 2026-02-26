@@ -24,8 +24,8 @@ const header = new Header(ensureElement('.header'), events);
 const modal = new Modal(ensureElement('#modal-container'), events);
 
 // МОДАЛЬНЫЕ VIEW (статичные экземпляры)
-const orderForm = new OrderForm(cloneTemplate('#order-form'), events);
-const contactsForm = new ContactsForm(cloneTemplate('#contacts-form'), events);
+const orderForm = new OrderForm(cloneTemplate('#order'), events);
+const contactsForm = new ContactsForm(cloneTemplate('#contacts'), events);
 const successView = new Success(cloneTemplate('#success'), () => modal.close());
 const basketView = new Basket(cloneTemplate('#basket'), events);
 
@@ -129,28 +129,27 @@ events.on('order:next', () => {
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
-  if (Object.keys(errors).length === 0 && buyer.getData().payment) {
+  if (Object.keys(errors).length === 0) {
     const buyerData = buyer.getData();
-    if (!buyerData.payment) return;  
+    if (buyerData.payment === '') return;  
     
     const orderData: IOrderRequest = {
       ...buyerData,
       total: cart.getTotalPrice(),
       items: cart.getItems().map(item => item.id)
-    };
+    } as IOrderRequest;  
     
     try {
-      const response = await communication.sendOrder(orderData); 
-      
+      const response = await communication.sendOrder(orderData);
       cart.clear();
       buyer.clear();
-
-      successView.render({ total: response.total }); 
+      successView.render({ total: response.total });
       modal.content = successView.render({ total: response.total });
       modal.open();
     } catch (error) { }
   }
 });
+
 
 events.on('order:changed', (data: {field: string, value: string}) => {
   buyer.setData({ [data.field]: data.value as string });
