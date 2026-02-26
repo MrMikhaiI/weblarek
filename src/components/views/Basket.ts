@@ -25,7 +25,8 @@ export class Basket extends Component<IBasket> {
     });
   }
 
-  render({ items, price, isEmpty }: IBasket) {
+  render(data: Partial<IBasket> = {}): HTMLElement {
+  const { items = [], price = 0, isEmpty = true } = data as IBasket;
     this.listElement.innerHTML = '';
     if (isEmpty) {
       this.listElement.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
@@ -36,5 +37,7 @@ export class Basket extends Component<IBasket> {
     this.priceElement.textContent = `${price} синапсов`;
     this.orderButton.disabled = isEmpty;
     this.orderButton.classList.toggle('button_disabled', isEmpty);
+
+    return this.container;
   }
 }
