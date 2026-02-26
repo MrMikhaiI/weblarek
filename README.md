@@ -188,42 +188,54 @@ yarn build
 
 ## Слой Представления (View)
 
+### Класс `Gallery`
+**Конструктор:** `constructor(container: HTMLElement)`  
+**Поля:** `container: HTMLElement`  
+**Методы:** `set catalog(items: HTMLElement[])` — заменяет содержимое каталога.
+
+### Класс `Header`  
+**Конструктор:** `constructor(container: HTMLElement, events: IEvents)`  
+**Поля:** `basketButton: HTMLButtonElement`, `counterElement: HTMLElement`  
+**Методы:** `set counter(value: number)` — обновляет счётчик корзины.
+
+### Класс `Modal`
+**Конструктор:** `constructor(container: HTMLElement, events: IEvents)`  
+**Поля:** `closeButton: HTMLButtonElement`, `contentElement: HTMLElement`  
+**Методы:** 
+- `set content(element: HTMLElement)` — заменяет содержимое модалки
+- `open(): void` — открывает модалку
+- `close(): void` — закрывает модалку
+
+### Класс `Basket`
+**Конструктор:** `constructor(container: HTMLElement, events: IEvents)`  
+**Интерфейс:** `IBasket { items: HTMLElement[], price: number, isEmpty: boolean }`  
+**Поля:** `listElement: HTMLElement`, `orderButton: HTMLButtonElement`, `priceElement: HTMLElement`  
+**Методы:** `render(data: IBasket): void` — рендерит корзину.
+
+### Класс `Success`
+**Конструктор:** `constructor(container: HTMLElement, onClose: () => void)`  
+**Интерфейс:** `ISuccess { total: number }`  
+**Методы:** `render(data: ISuccess): void` — показывает успешную оплату.
+
 ### Иерархия классов Card
-- **Card** (абстрактный) — title, price
-  - **CardCatalog** — каталог (`products:select`)
-  - **CardPreview** — модалка (`product:buy`)
-  - **CardBasket** — корзина (`product:remove`)
+**Card** (абстрактный базовый класс)
+- **CardCatalog** — каталог товаров
+  - **Конструктор:** `constructor(container: HTMLElement, events: IEvents, onSelect: (id: string) => void)`
+  - **Методы:** `render(product: IProduct): HTMLElement`
+- **CardPreview** — модальное окно товара
+  - **Конструктор:** `constructor(container: HTMLElement, callbacks: { onClick: () => void })`
+  - **Методы:** `render(product: IProduct): void`, `setButtonText(text: string, product?: IProduct)`
+- **CardBasket** — карточка в корзине
+  - **Конструктор:** `constructor(container: HTMLElement, events: IEvents, onDelete: (id: string) => void)`
+  - **Методы:** `render(product: IProduct): HTMLElement`
 
 ### Иерархия Form
-- **Form** (абстрактный) — валидация
-  - **OrderForm** — оплата+адрес (`order:changed`)
-  - **ContactsForm** — email+телефон (`contacts:changed`)
-
-## Все события MVP
-**Модели:** `catalog:productsChanged`, `cart:itemsChanged`, `buyer:dataChanged`
-**View:** `products:select`, `product:buy`, `cart:open`, `order:start/next/pay`
-
-#### Остальные компоненты
-- **Gallery** — каталог товаров
-- **Header** — счётчик корзины (`cart:open`)
-- **Modal** — модальные окна
-- **Basket** — корзина (`order:start`)
-- **Success** — успешная оплата
-
-## События приложения
-
-**Модели данных:**
-- `catalog:productsChanged` — обновление каталога
-- `catalog:selectedChanged` — выбор товара  
-- `cart:itemsChanged` — изменение корзины
-- `buyer:dataChanged` — изменение данных покупателя
-
-**Представления:**
-- `products:select` — клик по карточке каталога
-- `product:buy` — купить/удалить товар
-- `product:remove` — удалить из корзины
-- `cart:open` — открыть корзину
-- `order:start` — начать оформление
-- `order:next` — следующий шаг формы
-- `order:pay` — оплатить заказ
-- `order:changed` / `contacts:changed` — изменение полей форм
+**Form** (абстрактный базовый класс)
+- **OrderForm** — форма оплаты и адреса
+  - **Конструктор:** `constructor(container: HTMLFormElement, events: IEvents)`
+  - **Поля:** `paymentButtons: NodeListOf<HTMLButtonElement>`, `addressInput: HTMLInputElement`
+  - **Методы:** `set payment(value: string)`, `set address(value: string)`
+- **ContactsForm** — форма контактов
+  - **Конструктор:** `constructor(container: HTMLFormElement, events: IEvents)`
+  - **Поля:** `emailInput: HTMLInputElement`, `phoneInput: HTMLInputElement`
+  - **Методы:** `set email(value: string)`, `set phone(value: string)`
