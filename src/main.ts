@@ -38,9 +38,9 @@ communication.getProductList().then(products => {
 events.on('catalog:productsChanged', () => {
   const products = catalog.getProducts();
   const items = products.map(product => {
-    const card = new CardCatalog(cloneTemplate('#card-catalog'), events, 
-      (id: string) => events.emit('products:select', { id })
-    );
+    const card = new CardCatalog(cloneTemplate('#card-catalog') as HTMLElement, {
+      onSelect: (id: string) => events.emit('products:select', { id })
+    });
     return card.render(product) as HTMLElement; 
   });  
   gallery.catalog = items;
@@ -64,9 +64,9 @@ events.on('cart:itemsChanged', () => {
   
   basketView.render({
     items: cart.getItems().map(product => {
-      const card = new CardBasket(cloneTemplate('#card-basket'), events, 
-        (id: string) => events.emit('product:remove', { id })  
-      );
+      const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
+        onDelete: (id: string) => events.emit('product:remove', { id })
+      });
       card.render(product);
       return card.container as HTMLElement;
     }),
