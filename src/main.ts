@@ -63,11 +63,11 @@ events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
   
   basketView.render({
-    items: cart.getItems().map(product => {
+    items: cart.getItems().map((_product) => {
       const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
         onDelete: (id: string) => events.emit('product:remove', { id })
       });
-      return card.container as HTMLElement;
+      return (card as any).container as HTMLElement;
     }),
     price: cart.getTotalPrice(),
     isEmpty: cart.getCount() === 0
@@ -129,7 +129,7 @@ events.on('order:next', () => {
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
-  if (Object.keys(errors).length === 0 && buyer.getData().payment) { 
+  if (Object.keys(errors).length === 0 && buyer.getData().payment) {
     const orderData: IOrderRequest = {
       ...buyer.getData(),
       total: cart.getTotalPrice(),
