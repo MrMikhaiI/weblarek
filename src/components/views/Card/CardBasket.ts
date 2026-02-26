@@ -1,6 +1,7 @@
 import { Card } from './index';
 import { ensureElement } from '../../../utils/utils';
 import { ICardBasketCallbacks } from './types';
+import { IProduct } from '../../../types';
 
 export class CardBasket extends Card<IProduct> {  
   protected deleteButton!: HTMLButtonElement;
