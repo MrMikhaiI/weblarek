@@ -12,7 +12,7 @@ export class Success extends Component<ISuccess> {
   constructor(container: HTMLElement, protected onClose: () => void) {
     super(container);
     
-    this.closeButton = ensureElement('.order-success__close', container);
+    this.closeButton = ensureElement<HTMLButtonElement>('.order-success__close', container);
     this.totalElement = ensureElement('.order-success__description', container);
     
     this.closeButton.addEventListener('click', () => onClose());
