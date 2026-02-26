@@ -1,12 +1,9 @@
 import { Card } from './index';
 import { ensureElement } from '../../../utils/utils';
 import { IProduct } from '../../../types';
+import { ICardPreviewCallbacks } from './types';  
 
-interface ICardPreviewCallbacks {
-  onClick: () => void;
-}
-
-export class CardPreview extends Card {
+export class CardPreview extends Card<IProduct> {  
   protected descriptionElement!: HTMLElement;
   protected button!: HTMLButtonElement;
 
@@ -14,14 +11,15 @@ export class CardPreview extends Card {
     super(container);
     
     this.descriptionElement = ensureElement('.card__text', container);
-    this.button = ensureElement('.card__button', container);
+    this.button = ensureElement<HTMLButtonElement>('.card__button', container);  
     
     this.button.addEventListener('click', () => callbacks.onClick());
   }
 
-  render(product: IProduct) {
+  render(product: IProduct): HTMLElement { 
     super.render(product);
     this.descriptionElement.textContent = product.description || '';
+    return this.container;  
   }
 
   setButtonText(text: string, product?: IProduct) { 
