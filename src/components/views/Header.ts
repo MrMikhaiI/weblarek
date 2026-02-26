@@ -13,7 +13,7 @@ export class Header extends Component<IHeader> {
   constructor(container: HTMLElement, protected events: IEvents) {
     super(container);
     
-    this.basketButton = ensureElement('.header__basket', container);
+    this.basketButton = ensureElement<HTMLButtonElement>('.header__basket', container);
     this.counterElement = ensureElement('.header__basket-counter', container);
     
     this.basketButton.addEventListener('click', () => {
