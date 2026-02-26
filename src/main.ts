@@ -39,7 +39,7 @@ events.on('catalog:productsChanged', () => {
   const products = catalog.getProducts();
   const items = products.map(product => {
     const card = new CardCatalog(cloneTemplate('#card-catalog'), events, 
-      (id) => events.emit('products:select', id) 
+      (id: string) => events.emit('products:select', { id })
     );
     return card.render(product); 
   });  
@@ -66,7 +66,7 @@ events.on('cart:itemsChanged', () => {
   basketView.render({
     items: cart.getItems().map(product => {
       const card = new CardBasket(cloneTemplate('#card-basket'), events, 
-        (id) => events.emit('product:remove', id)  // ✅ Колбэк как в CardCatalog!
+        (id: string) => events.emit('product:remove', { id })  
       );
       card.render(product);
       return card.render();
