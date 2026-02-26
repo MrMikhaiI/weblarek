@@ -130,8 +130,11 @@ events.on('order:next', () => {
 events.on('order:pay', async () => {
   const errors = buyer.validate();
   if (Object.keys(errors).length === 0 && buyer.getData().payment) {
+    const buyerData = buyer.getData();
+    if (!buyerData.payment) return;  
+    
     const orderData: IOrderRequest = {
-      ...buyer.getData(),
+      ...buyerData,
       total: cart.getTotalPrice(),
       items: cart.getItems().map(item => item.id)
     };
