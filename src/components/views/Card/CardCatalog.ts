@@ -1,29 +1,30 @@
 import { Card } from './index';
 import { categoryMap, CDN_URL } from '../../../utils/constants';
-import { IEvents } from '../../base/Events';
+import { ICardCatalogCallbacks } from './types';  
 import { IProduct } from '../../../types';
 import { ensureElement } from '../../../utils/utils';
 
-export class CardCatalog extends Card {
+export class CardCatalog extends Card<IProduct> {  
   protected imageElement!: HTMLImageElement;
   protected categoryElement!: HTMLElement;
 
-  constructor(container: HTMLElement, protected events: IEvents) {  
+  constructor(container: HTMLElement, protected callbacks: ICardCatalogCallbacks) {  
     super(container);
-    this.imageElement = ensureElement('.card__image', container);
+    this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);  
     this.categoryElement = ensureElement('.card__category', container);
 
     container.addEventListener('click', () => {
-      const productId = (container as HTMLElement).dataset.productId;
-      this.events.emit('products:select', productId);
+      const productId = container.dataset.productId;  
+      this.callbacks.onSelect(productId!);  
     });
   }
 
-  render(product: IProduct) {  
+  render(product: IProduct): HTMLElement {  
     this.title = product.title;
     this.price = product.price;
     this.image = product.image;
     this.category = product.category;
+    return this.container;  
   }
 
   set image(value: string) {
