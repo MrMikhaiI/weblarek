@@ -113,19 +113,19 @@ events.on('product:remove', (id: string) => {
 });
 
 events.on('cart:open', () => {
-  modal.content = basketView.container;
+  modal.content = basketView.render({items:[], price: 0, isEmpty: true});
   modal.open();
 });
 
 events.on('order:start', () => {
   orderForm.render({});
-  modal.content = orderForm.container;
+  modal.content = orderForm.render({});
   modal.open();
 });
 
 events.on('order:next', () => {
   contactsForm.render({});
-  modal.content = contactsForm.container;
+  modal.content = contactsForm.render({});
   modal.open();
 });
 
@@ -145,14 +145,14 @@ events.on('order:pay', async () => {
       buyer.clear();
 
       successView.render({ total: response.total }); 
-      modal.content = successView.container;
+      modal.content = successView.render({ total: 0 });
       modal.open();
     } catch (error) { }
   }
 });
 
 events.on('order:changed', (data: {field: string, value: string}) => {
-  buyer.setData({ [data.field]: data.value as TPayment | string });
+  buyer.setData({ [data.field]: data.value as string });
 });
 
 events.on('contacts:changed', (data: {field: string, value: string}) => {
