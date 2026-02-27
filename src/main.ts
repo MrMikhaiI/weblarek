@@ -108,7 +108,6 @@ events.on('product:remove', (event: { id: string }) => {
 });
 
 events.on('cart:open', () => {
-  basketView.render();  
   modal.content = basketView as unknown as HTMLElement;  
   modal.open();
 });
