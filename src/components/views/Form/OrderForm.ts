@@ -15,7 +15,7 @@ export class OrderForm extends Form {
       btn.addEventListener('click', () => { 
         events.emit('order:changed', {  
           field: 'payment',  
-          value: btn.dataset.payment!  
+          value: btn.name!  
         }); 
       }); 
     }); 
@@ -37,7 +37,7 @@ export class OrderForm extends Form {
 
   set payment(value: string) { 
     this.paymentButtons.forEach(btn => { 
-      btn.classList.toggle('button_alt-active', btn.dataset.payment === value); 
+      btn.classList.toggle('button_alt-active', btn.name === value); 
     }); 
   } 
 
