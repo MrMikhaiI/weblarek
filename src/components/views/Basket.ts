@@ -25,19 +25,19 @@ export class Basket extends Component<IBasket> {
     });
   }
 
-  render(data: Partial<IBasket> = {}): HTMLElement {
-  const { items = [], price = 0, isEmpty = true } = data as IBasket;
+  set items(value: HTMLElement[]) {
     this.listElement.innerHTML = '';
-    if (isEmpty) {
+    if (value.length === 0) {
       this.listElement.innerHTML = '<p class="basket__empty">Корзина пуста</p>';
     } else {
-      this.listElement.append(...items);
+      this.listElement.append(...value);
     }
-    
-    this.priceElement.textContent = `${price} синапсов`;
-    this.orderButton.disabled = isEmpty;
-    this.orderButton.classList.toggle('button_disabled', isEmpty);
+    this.orderButton.disabled = value.length === 0;
+    this.orderButton.classList.toggle('button_disabled', value.length === 0);
+  }
 
-    return this.container;
+  set price(value: number) {
+    this.priceElement.textContent = `${value} синапсов`;
   }
 }
+
