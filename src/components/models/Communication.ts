@@ -1,5 +1,4 @@
 import { IApi, IProduct, IOrderRequest, IOrderResponse } from '../../types'; 
-import { API_URL } from '../../utils/constants';  
 
 export class Communication {  
   private api: IApi;   
