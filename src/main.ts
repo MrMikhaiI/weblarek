@@ -109,17 +109,20 @@ events.on('product:remove', (event: { id: string }) => {
 
 events.on('cart:open', () => {
   basketView.render();  
+  modal.content = basketView as unknown as HTMLElement;  
   modal.open();
 });
 
 events.on('order:start', () => {
+  modal.content = orderForm as unknown as HTMLElement;
   modal.open();
 });
 
 events.on('order:next', () => {
-  modal.content = contactsForm.element; 
+  modal.content = contactsForm as unknown as HTMLElement;
   modal.open();
 });
+
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
