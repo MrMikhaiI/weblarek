@@ -1,7 +1,8 @@
+import { Form } from './Form';  
 import { ensureElement } from '../../../utils/utils'; 
 import { IEvents } from '../../base/Events'; 
 
-export class OrderForm extends Form { 
+export class OrderForm extends Form {
   protected paymentButtons!: NodeListOf<HTMLButtonElement>; 
   protected addressInput!: HTMLInputElement; 
 
@@ -13,23 +14,17 @@ export class OrderForm extends Form {
      
     this.paymentButtons.forEach(btn => { 
       btn.addEventListener('click', () => { 
-        events.emit('order:changed', {  
-          field: 'payment',  
-          value: btn.name!  
-        }); 
+        events.emit('order:changed', { field: 'payment', value: btn.name! }); 
       }); 
     }); 
      
     this.addressInput.addEventListener('input', () => { 
-      events.emit('order:changed', {  
-        field: 'address',  
-        value: this.addressInput.value  
-      }); 
+      events.emit('order:changed', { field: 'address', value: this.addressInput.value }); 
     }); 
 
-    this.formElement.addEventListener('submit', (e) => { 
+    container.addEventListener('submit', (e: Event) => { 
       e.preventDefault(); 
-      if (!this.submitButton.disabled) { 
+      if (!container.querySelector('.order__button')!.hasAttribute('disabled')) { 
         events.emit('order:next');   
       } 
     }); 
