@@ -74,10 +74,6 @@ events.on('buyer:dataChanged', () => {
   orderForm.address = buyerData.address || ''; 
   contactsForm.email = buyerData.email || '';   
   contactsForm.phone = buyerData.phone || ''; 
- 
-  const orderErrors = { address: buyer.validate().address };
-  const contactErrors = { email: buyer.validate().email, phone: buyer.validate().phone };
-  
   orderForm.errors = [];
   contactsForm.errors = [];
   orderForm.valid = true;
@@ -121,7 +117,7 @@ events.on('order:start', () => {
 });
 
 events.on('order:next', () => {
-  modal.content = contactsForm.container;  
+  modal.content = contactsForm.element; 
   modal.open();
 });
 
@@ -147,7 +143,6 @@ events.on('order:pay', async () => {
     } catch (error) { }
   }
 });
-
 
 events.on('order:changed', (data: {field: string, value: string}) => {
   buyer.setData({ [data.field]: data.value as string });
