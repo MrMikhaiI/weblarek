@@ -6,12 +6,11 @@ import {
   OrderForm, ContactsForm, Success, Basket 
 } from './components/views/index';
 import { cloneTemplate, ensureElement } from './utils/utils';
-import { API_URL } from './utils/constants';
 import { IOrderRequest, IProduct } from './types';
 
 // Инициализация моделей
 const events = new EventEmitter();
-const api = new Api(API_URL);
+const api = new Api('/api');
 const communication = new Communication(api);
 
 const catalog = new Catalog(events);
@@ -61,26 +60,28 @@ events.on('catalog:selectedChanged', (product: IProduct) => {
 
 events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
-  
-  basketView.render({
-    items: cart.getItems().map(product => {  
-      const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, { 
-        onDelete: () => events.emit('product:remove', { id: product.id })  
-      });
-      return card.render(product) as HTMLElement; 
-    }),
-    price: cart.getTotalPrice(),
-    isEmpty: cart.getCount() === 0
+  basketView.items = cart.getItems().map(product => {
+    const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
+      onDelete: () => events.emit('product:remove', { id: product.id })
+    });
+    return card.render(product) as HTMLElement;
   });
+  basketView.price = cart.getTotalPrice();
 });
 
 events.on('buyer:dataChanged', () => {
-  const errors = buyer.validate();
-
-  orderForm.errors = Object.values(errors);
-  contactsForm.errors = Object.values(errors);
-  orderForm.valid = Object.keys(errors).length === 0;
-  contactsForm.valid = Object.keys(errors).length === 0;
+  const buyerData = buyer.getData();  
+  orderForm.address = buyerData.address || ''; 
+  contactsForm.email = buyerData.email || '';   
+  contactsForm.phone = buyerData.phone || ''; 
+ 
+  const orderErrors = { address: buyer.validate().address };
+  const contactErrors = { email: buyer.validate().email, phone: buyer.validate().phone };
+  
+  orderForm.errors = Object.values(orderErrors);
+  contactsForm.errors = Object.values(contactErrors);
+  orderForm.valid = !orderErrors.address;
+  contactsForm.valid = !contactErrors.email && !contactErrors.phone;
 });
 
 // 3. СОБЫТИЯ VIEW
@@ -111,7 +112,7 @@ events.on('product:remove', (event: { id: string }) => {
 });
 
 events.on('cart:open', () => {
-  modal.content = basketView.render({items:[], price: 0, isEmpty: true});
+  basketView.render();  
   modal.open();
 });
 
