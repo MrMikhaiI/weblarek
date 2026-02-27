@@ -38,10 +38,10 @@ communication.getProductList().then(products => {
 events.on('catalog:productsChanged', () => {
   const products = catalog.getProducts();
   const items = products.map(product => {
-    const card = new CardCatalog(cloneTemplate('#card-catalog') as HTMLElement, {
-      onSelect: (id: string) => events.emit('products:select', { id })
+    const card = new CardCatalog(cloneTemplate('#card-catalog') as HTMLElement, { 
+      onSelect: () => events.emit('products:select', { id: product.id })  
     });
-    return card.render(product) as HTMLElement; 
+    return card.render(product) as HTMLElement;  
   });  
   gallery.catalog = items;
 });
@@ -63,11 +63,11 @@ events.on('cart:itemsChanged', () => {
   header.counter = cart.getCount();
   
   basketView.render({
-    items: cart.getItems().map((_product) => {
-      const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
-        onDelete: (id: string) => events.emit('product:remove', { id })
+    items: cart.getItems().map(product => {  
+      const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, { 
+        onDelete: () => events.emit('product:remove', { id: product.id })  
       });
-      return (card as any).container as HTMLElement;
+      return card.render(product) as HTMLElement; 
     }),
     price: cart.getTotalPrice(),
     isEmpty: cart.getCount() === 0
