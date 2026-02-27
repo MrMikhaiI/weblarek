@@ -78,10 +78,10 @@ events.on('buyer:dataChanged', () => {
   const orderErrors = { address: buyer.validate().address };
   const contactErrors = { email: buyer.validate().email, phone: buyer.validate().phone };
   
-  orderForm.errors = Object.values(orderErrors);
-  contactsForm.errors = Object.values(contactErrors);
-  orderForm.valid = !orderErrors.address;
-  contactsForm.valid = !contactErrors.email && !contactErrors.phone;
+  orderForm.errors = [];
+  contactsForm.errors = [];
+  orderForm.valid = true;
+  contactsForm.valid = true;
 });
 
 // 3. СОБЫТИЯ VIEW
@@ -117,14 +117,11 @@ events.on('cart:open', () => {
 });
 
 events.on('order:start', () => {
-  orderForm.render({});
-  modal.content = orderForm.render({});
   modal.open();
 });
 
 events.on('order:next', () => {
-  contactsForm.render({});
-  modal.content = contactsForm.render({});
+  modal.content = contactsForm.container;  
   modal.open();
 });
 
