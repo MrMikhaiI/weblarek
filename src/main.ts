@@ -6,11 +6,12 @@ import {
   OrderForm, ContactsForm, Success, Basket 
 } from './components/views/index';
 import { cloneTemplate, ensureElement } from './utils/utils';
+import { API_URL } from './utils/constants';     
 import { IOrderRequest, IProduct } from './types';
 
 // Инициализация моделей
 const events = new EventEmitter();
-const api = new Api('/api');
+const api = new Api(API_URL);             
 const communication = new Communication(api);
 
 const catalog = new Catalog(events);
