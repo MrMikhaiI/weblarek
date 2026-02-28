@@ -75,25 +75,19 @@ events.on('buyer:dataChanged', () => {
   const buyerData = buyer.getData();
   const errors = buyer.validate();
 
+  // OrderForm
   orderForm.address = buyerData.address || '';
-  orderForm.payment = buyerData.payment || '';   
-
-  contactsForm.email = buyerData.email || '';
-  contactsForm.phone = buyerData.phone || '';
-
-  // Ошибки для orderForm (payment + address)
-  const orderErrors: string[] = [];
-  if (errors.payment) orderErrors.push(errors.payment);
-  if (errors.address) orderErrors.push(errors.address);
-  orderForm.errors = orderErrors;
+  orderForm.payment = buyerData.payment || '';
+  const orderErrors = [errors.payment, errors.address].filter(Boolean).join('; ');
+  orderForm.errors = [orderErrors];
   orderForm.valid = orderErrors.length === 0;
 
-  // Ошибки для contactsForm (email + phone)
-  const contactsErrors: string[] = [];
-  if (errors.email) contactsErrors.push(errors.email);
-  if (errors.phone) contactsErrors.push(errors.phone);
-  contactsForm.errors = contactsErrors;
-  contactsForm.valid = contactsErrors.length === 0;
+  // ContactsForm  
+  contactsForm.email = buyerData.email || '';
+  contactsForm.phone = buyerData.phone || '';
+  const contactErrors = [errors.email, errors.phone].filter(Boolean).join('; ');
+  contactsForm.errors = [contactErrors];
+  contactsForm.valid = contactErrors.length === 0;
 });
 
 // 3. СОБЫТИЯ VIEW
