@@ -71,14 +71,29 @@ events.on('cart:itemsChanged', () => {
 });
 
 events.on('buyer:dataChanged', () => {
-  const buyerData = buyer.getData();  
-  orderForm.address = buyerData.address || ''; 
-  contactsForm.email = buyerData.email || '';   
-  contactsForm.phone = buyerData.phone || ''; 
-  orderForm.errors = [];
-  contactsForm.errors = [];
-  orderForm.valid = true;
-  contactsForm.valid = true;
+  const buyerData = buyer.getData();
+  const errors = buyer.validate();
+
+  // Подставляем данные в формы
+  orderForm.address = buyerData.address || '';
+  orderForm.payment = buyerData.payment || '';   
+
+  contactsForm.email = buyerData.email || '';
+  contactsForm.phone = buyerData.phone || '';
+
+  // Ошибки для orderForm (payment + address)
+  const orderErrors: string[] = [];
+  if (errors.payment) orderErrors.push(errors.payment);
+  if (errors.address) orderErrors.push(errors.address);
+  orderForm.errors = orderErrors;
+  orderForm.valid = orderErrors.length === 0;
+
+  // Ошибки для contactsForm (email + phone)
+  const contactsErrors: string[] = [];
+  if (errors.email) contactsErrors.push(errors.email);
+  if (errors.phone) contactsErrors.push(errors.phone);
+  contactsForm.errors = contactsErrors;
+  contactsForm.valid = contactsErrors.length === 0;
 });
 
 // 3. СОБЫТИЯ VIEW
@@ -109,20 +124,19 @@ events.on('product:remove', (event: { id: string }) => {
 });
 
 events.on('cart:open', () => {
-  modal.content = basketView as unknown as HTMLElement;  
+  modal.content = basketView.render(); 
   modal.open();
 });
 
 events.on('order:start', () => {
-  modal.content = orderForm as unknown as HTMLElement;
+  modal.content = orderForm.render();    
   modal.open();
 });
 
 events.on('order:next', () => {
-  modal.content = contactsForm as unknown as HTMLElement;
+  modal.content = contactsForm.render();
   modal.open();
 });
-
 
 events.on('order:pay', async () => {
   const errors = buyer.validate();
