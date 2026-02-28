@@ -74,7 +74,6 @@ events.on('buyer:dataChanged', () => {
   const buyerData = buyer.getData();
   const errors = buyer.validate();
 
-  // Подставляем данные в формы
   orderForm.address = buyerData.address || '';
   orderForm.payment = buyerData.payment || '';   
 
