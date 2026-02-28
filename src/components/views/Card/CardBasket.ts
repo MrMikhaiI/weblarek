@@ -11,7 +11,7 @@ export class CardBasket extends Card<IProduct> {
    
     this.deleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', container); 
     this.deleteButton.addEventListener('click', () => { 
-    this.callbacks.onDelete(container.dataset.productId!); 
+    this.callbacks.onDelete();    
     }); 
-  }  
+  } 
 }
