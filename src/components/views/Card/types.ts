@@ -1,9 +1,9 @@
 export interface ICardCatalogCallbacks {
-  onSelect: (id: string) => void;
+  onSelect: () => void;
 }
 
 export interface ICardBasketCallbacks {
-  onDelete: (id: string) => void;  // ✅ onDelete!
+  onDelete: () => void;
 }
 
 export interface ICardPreviewCallbacks {
