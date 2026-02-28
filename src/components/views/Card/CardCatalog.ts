@@ -9,13 +9,12 @@ export class CardCatalog extends Card<IProduct> {
   protected categoryElement!: HTMLElement;
 
   constructor(container: HTMLElement, protected callbacks: ICardCatalogCallbacks) {  
-    super(container);
-    this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);  
-    this.categoryElement = ensureElement('.card__category', container);
+  super(container);
+  this.imageElement = ensureElement<HTMLImageElement>('.card__image', container);  
+  this.categoryElement = ensureElement('.card__category', container);
 
-    container.addEventListener('click', () => {
-      const productId = container.dataset.productId;  
-      this.callbacks.onSelect(productId!);  
+  container.addEventListener('click', () => {
+    this.callbacks.onSelect();   
     });
   }
 
