@@ -65,6 +65,7 @@ events.on('cart:itemsChanged', () => {
     const card = new CardBasket(cloneTemplate('#card-basket') as HTMLElement, {
       onDelete: () => events.emit('product:remove', { id: product.id })
     });
+
     return card.render(product) as HTMLElement;
   });
   basketView.price = cart.getTotalPrice();
